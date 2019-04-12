@@ -1,7 +1,8 @@
 import * as React from 'react';
+import {OverlayTrigger, Tooltip} from "react-bootstrap";
 import {observer} from "mobx-react";
 import {observable, computed} from "mobx";
-import {HitZoneConfig, defaultHitzoneConfig, initHitZoneFromConfig, DefaultTooltip} from "cbioportal-frontend-commons";
+import {HitZoneConfig, defaultHitzoneConfig, initHitZoneFromConfig} from "cbioportal-frontend-commons";
 
 import LollipopPlotNoTooltip from "./LollipopPlotNoTooltip";
 import DataStore from "./model/DataStore";
@@ -45,7 +46,7 @@ export default class LollipopPlot extends React.Component<LollipopPlotProps, {}>
                     hitRect, content, onMouseOver, onClick, onMouseOut, cursor, tooltipPlacement
                 };
             },
-            getOverlay:()=>this.hitZoneConfig.content,
+            getOverlay:()=><Tooltip id={"lollipop-plot-tooltip"}>{this.hitZoneConfig.content}</Tooltip>,
             getOverlayPlacement:()=>this.hitZoneConfig.tooltipPlacement,
             onMouseLeave:()=>{
                 this.hitZoneConfig.onMouseOut && this.hitZoneConfig.onMouseOut();
@@ -80,13 +81,12 @@ export default class LollipopPlot extends React.Component<LollipopPlotProps, {}>
         }
         return (
             <div style={{position:"relative"}} data-test="LollipopPlot">
-                <DefaultTooltip
+                <OverlayTrigger
                     placement={this.handlers.getOverlayPlacement()}
-                    overlay={this.handlers.getOverlay}
-                    {...tooltipVisibleProps}
+                    overlay={this.handlers.getOverlay()}
                 >
                     {this.hitZone}
-                </DefaultTooltip>
+                </OverlayTrigger>
                 <LollipopPlotNoTooltip
                     ref={this.handlers.ref}
                     setHitZone={this.handlers.setHitZone}
