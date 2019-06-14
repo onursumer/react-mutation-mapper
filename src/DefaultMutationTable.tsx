@@ -2,11 +2,13 @@ import {computed} from "mobx";
 import {observer} from "mobx-react";
 import * as React from "react";
 
-import {calcProteinChangeSortValue} from "cbioportal-frontend-commons";
-
+import ProteinChange, {proteinChangeSortMethod} from "./component/column/ProteinChange";
 import {Mutation} from "./model/Mutation";
-import {defaultSortMethod} from "./util/ReactTableUtils";
 import DataTable, {IDataTableProps} from "./DataTable";
+
+export enum MutationColumn {
+    PROTEIN_CHANGE = "proteinChange"
+}
 
 @observer
 class DefaultMutationTableComponent extends DataTable<Mutation> {}
@@ -18,11 +20,11 @@ export default class DefaultMutationTable extends React.Component<IDataTableProp
     get columns() {
         return [
             {
-                id: "proteinChange",
-                accessor: "proteinChange",
+                id: MutationColumn.PROTEIN_CHANGE,
+                accessor: MutationColumn.PROTEIN_CHANGE,
+                Cell: (column: any) => <ProteinChange mutation={column.original} />,
                 Header: "Protein Change",
-                sortMethod: (a: string, b: string) =>
-                    defaultSortMethod(calcProteinChangeSortValue(a || ""), calcProteinChangeSortValue(b || ""))
+                sortMethod: proteinChangeSortMethod
             }
         ];
     }
