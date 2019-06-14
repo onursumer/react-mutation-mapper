@@ -18,7 +18,7 @@ export default class DefaultMutationTable extends React.Component<IDataTableProp
                 accessor: "proteinChange",
                 Header: "Protein Change",
                 sortMethod: (a: string, b: string) =>
-                    defaultSortMethod(calcProteinChangeSortValue(a), calcProteinChangeSortValue(b))
+                    defaultSortMethod(calcProteinChangeSortValue(a || ""), calcProteinChangeSortValue(b || ""))
             }
         ];
     }
