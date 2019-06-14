@@ -69,8 +69,6 @@ export default class DataTable<T> extends React.Component<IDataTableProps<T>, {}
                     defaultSorted={defaultSorted}
                     defaultPageSize={data.length > initialItemsPerPage! ? initialItemsPerPage : data.length}
                     showPagination={showPagination}
-                    showPaginationTop={true}
-                    showPaginationBottom={false}
                     className="-striped -highlight"
                     previousText="<"
                     nextText=">"
