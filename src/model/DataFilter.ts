@@ -6,3 +6,7 @@ export type DataFilter = {
     hotspot?: HotspotFilter[];
     oncokb?: OncoKbFilter[];
 }
+
+export type CustomFilterApplier = <T>(filter: DataFilter,
+                                      datum: T,
+                                      positions: {[position: string]: {position: number}}) => boolean;

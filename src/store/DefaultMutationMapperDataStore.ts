@@ -1,7 +1,7 @@
 import _ from "lodash";
 import {action, computed, observable} from "mobx";
 
-import {DataFilter} from "../model/DataFilter";
+import {CustomFilterApplier, DataFilter} from "../model/DataFilter";
 import DataStore from "../model/DataStore";
 import {Mutation} from "../model/Mutation";
 import {findAllUniquePositions} from "../util/FilterUtils";
@@ -14,8 +14,15 @@ export class DefaultMutationMapperDataStore implements DataStore
     // TODO simplify data if possible
     private data: Array<Mutation | Mutation[]>;
 
-    constructor(data: Array<Mutation | Mutation[]>) {
+    // this custom filter applier allows us to interpret selection and highlight filters in a customized way,
+    // by default only position filters are taken into account
+    protected applyCustomFilter: CustomFilterApplier | undefined;
+
+    constructor(data: Array<Mutation | Mutation[]>,
+                applyCustomFilter?: CustomFilterApplier)
+    {
         this.data = data;
+        this.applyCustomFilter = applyCustomFilter;
     }
 
     @computed
@@ -59,6 +66,38 @@ export class DefaultMutationMapperDataStore implements DataStore
 
     public isPositionHighlighted(position: number) {
         return !!this.highlightedPositions[position+""];
+    }
+
+    public dataSelectFilter(mutation: Mutation): boolean
+    {
+        return (
+            this.selectionFilters.length > 0 &&
+            !this.selectionFilters
+                .map(dataFilter => this.applyFilter(dataFilter, mutation, this.selectedPositions))
+                .includes(false)
+        );
+    }
+
+    public dataHighlightFilter(mutation: Mutation): boolean
+    {
+        return (
+            this.highlightFilters.length > 0 &&
+            !this.highlightFilters
+                .map(dataFilter => this.applyFilter(dataFilter, mutation, this.highlightedPositions))
+                .includes(false)
+        );
+    }
+
+    public applyFilter(filter: DataFilter, mutation: Mutation, positions: {[position: string]: {position: number}})
+    {
+        if (this.applyCustomFilter) {
+            // let the custom filter applier decide how to apply the given filter
+            return this.applyCustomFilter(filter, mutation, positions);
+        }
+        else {
+            // by default only filter by position
+            return !!positions[mutation.proteinPosStart+""];
+        }
     }
 }
 

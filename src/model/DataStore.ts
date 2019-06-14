@@ -8,8 +8,11 @@ export interface DataStore {
     clearSelectionFilters: () => void;
     selectionFilters: DataFilter[];
     highlightFilters: DataFilter[];
-    isPositionSelected: (position:number) => boolean;
-    isPositionHighlighted: (position:number) => boolean;
+    isPositionSelected: (position: number) => boolean;
+    isPositionHighlighted: (position: number) => boolean;
+    dataSelectFilter: (datum: any) => boolean;
+    dataHighlightFilter: (datum: any) => boolean;
+    applyFilter: (filter: DataFilter, datum: any, positions: {[position: string]: {position: number}}) => void;
 }
 
 export default DataStore;
