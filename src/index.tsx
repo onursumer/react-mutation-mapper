@@ -5,6 +5,7 @@ export {default as LollipopMutationPlot} from "./LollipopMutationPlot";
 export {default as LollipopPlot} from "./LollipopPlot";
 export {default as LollipopPlotNoTooltip} from "./LollipopPlotNoTooltip";
 export {default as Sequence} from "./LollipopPlot";
+export {default as MutationMapper} from "./MutationMapper";
 export {
     default as TrackSelector,
     TrackDataStatus,
@@ -13,7 +14,7 @@ export {
 } from "./TrackSelector";
 
 export {IHotspotIndex} from "./model/CancerHotspot";
-export {DataFilter} from "./model/DataFilter";
+export {CustomFilterApplier, DataFilter} from "./model/DataFilter";
 export {DataStore} from "./model/DataStore";
 export {DomainSpec} from "./model/DomainSpec";
 export {IProteinImpactTypeColors} from "./model/ProteinImpact";
