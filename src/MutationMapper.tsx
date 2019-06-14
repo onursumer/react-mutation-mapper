@@ -6,7 +6,6 @@ import MutationMapperStore from "./model/MutationMapperStore";
 import DefaultMutationMapperStore from "./store/DefaultMutationMapperStore";
 import LollipopMutationPlot from "./LollipopMutationPlot";
 import DefaultMutationTable from "./DefaultMutationTable";
-import autobind from "autobind-decorator";
 
 export interface IMutationMapperProps {
     hugoSymbol: string;
@@ -30,7 +29,7 @@ export default class MutationMapper extends React.Component<IMutationMapperProps
         return this.props.mutationTable || (
             <DefaultMutationTable
                 data={this.props.data}
-                isHighlighted={this.isMutationHighlighted}
+                dataStore={this.props.store ? this.props.store.dataStore : undefined}
             />
         );
     }
@@ -45,10 +44,5 @@ export default class MutationMapper extends React.Component<IMutationMapperProps
                 {this.mutationTable}
             </React.Fragment>
         );
-    }
-
-    @autobind
-    protected isMutationHighlighted(mutation: Mutation) {
-        return this.store.dataStore.dataHighlightFilter(mutation);
     }
 }

@@ -1,10 +1,11 @@
 import {computed} from "mobx";
 import * as React from "react";
 
-import {Mutation} from "./model/Mutation";
-import DataTable, {IDataTableProps} from "./DataTable";
-import {defaultSortMethod} from "./util/ReactTableUtils";
 import {calcProteinChangeSortValue} from "cbioportal-frontend-commons";
+
+import {Mutation} from "./model/Mutation";
+import {defaultSortMethod} from "./util/ReactTableUtils";
+import DataTable, {IDataTableProps} from "./DataTable";
 
 class DefaultMutationTableComponent extends DataTable<Mutation> {}
 

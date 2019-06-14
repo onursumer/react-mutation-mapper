@@ -5,12 +5,13 @@ import ReactTable, {Column, RowInfo} from "react-table";
 import classnames from "classnames";
 import {computed} from "mobx";
 
+import {DataStore} from "./model/DataStore";
 import './defaultDataTable.scss';
 
 export interface IDataTableProps<T> {
     data: T[];
     columns?: Column<T>[];
-    isHighlighted?: (datum: T) => boolean;
+    dataStore?: DataStore;
     className?: string;
 
     initialSortColumn?: string;
@@ -54,7 +55,9 @@ export default class DataTable<T> extends React.Component<IDataTableProps<T>, {}
                 <ReactTable
                     data={data}
                     columns={this.columns}
-                    getTrProps={this.props.isHighlighted ? this.getTrProps : undefined}
+                    getTrProps={
+                        this.props.dataStore && this.props.dataStore.highlightFilters ? this.getTrProps : undefined
+                    }
                     defaultSorted={defaultSorted}
                     defaultPageSize={data.length > initialItemsPerPage! ? initialItemsPerPage : data.length}
                     showPagination={showPagination}
@@ -79,6 +82,6 @@ export default class DataTable<T> extends React.Component<IDataTableProps<T>, {}
 
     @autobind
     protected isRowHighlighted(datum: T) {
-        return this.props.isHighlighted && this.props.isHighlighted(datum);
+        return this.props.dataStore && this.props.dataStore.dataHighlightFilter(datum);
     }
 }
