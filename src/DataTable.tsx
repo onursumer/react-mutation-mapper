@@ -5,6 +5,8 @@ import ReactTable, {Column, RowInfo} from "react-table";
 import classnames from "classnames";
 import {computed} from "mobx";
 
+import './defaultDataTable.scss';
+
 export interface IDataTableProps<T> {
     data: T[];
     columns?: Column<T>[];
