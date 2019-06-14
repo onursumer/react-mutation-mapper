@@ -29,7 +29,7 @@ export default class MutationMapper extends React.Component<IMutationMapperProps
         return this.props.mutationTable || (
             <DefaultMutationTable
                 data={this.props.data}
-                dataStore={this.props.store ? this.props.store.dataStore : undefined}
+                dataStore={this.store.dataStore}
             />
         );
     }
