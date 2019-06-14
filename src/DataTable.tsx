@@ -56,7 +56,8 @@ export default class DataTable<T> extends React.Component<IDataTableProps<T>, {}
                     data={data}
                     columns={this.columns}
                     getTrProps={
-                        this.props.dataStore && this.props.dataStore.highlightFilters ? this.getTrProps : undefined
+                        this.props.dataStore && this.props.dataStore.highlightFilters.length >= 0 ?
+                            this.getTrProps : undefined
                     }
                     defaultSorted={defaultSorted}
                     defaultPageSize={data.length > initialItemsPerPage! ? initialItemsPerPage : data.length}
