@@ -98,7 +98,7 @@ export default class DataTable<T> extends React.Component<IDataTableProps<T>, {}
         let background: string | undefined;
 
         if (this.isRowHighlighted(row.original)) {
-            background = row.index % 2 === 1 ? this.props.highlightColorDark : this.props.highlightColorLight;
+            background = row.viewIndex % 2 === 1 ? this.props.highlightColorDark : this.props.highlightColorLight;
         }
 
         return background;
