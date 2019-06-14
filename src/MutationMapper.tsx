@@ -1,4 +1,5 @@
 import {computed} from "mobx";
+import {observer} from "mobx-react";
 import * as React from "react";
 
 import {Mutation} from "./model/Mutation";
@@ -14,6 +15,7 @@ export interface IMutationMapperProps {
     mutationTable?: JSX.Element;
 }
 
+@observer
 export default class MutationMapper extends React.Component<IMutationMapperProps, {}>
 {
     @computed
