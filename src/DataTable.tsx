@@ -70,7 +70,7 @@ export default class DataTable<T> extends React.Component<IDataTableProps<T>, {}
     protected getTrProps(state: any, row: RowInfo) {
         return {
             style: {
-                background: this.isRowHighlighted(row.original) ? "red" : undefined
+                background: state && this.isRowHighlighted(row.original) ? "red" : undefined
             }
         };
     }
