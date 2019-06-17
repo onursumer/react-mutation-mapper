@@ -94,11 +94,11 @@ export default class DataTable<T> extends React.Component<IDataTableProps<T>, {}
     }
 
     @autobind
-    protected getTrProps(state: any, row: RowInfo)
+    protected getTrProps(state: any, row?: RowInfo)
     {
         return {
             style: {
-                background: state && this.getRowBackground(row)
+                background: state && row && this.getRowBackground(row)
             }
         };
     }
