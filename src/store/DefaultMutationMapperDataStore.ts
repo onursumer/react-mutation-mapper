@@ -31,6 +31,13 @@ export class DefaultMutationMapperDataStore implements DataStore
     }
 
     @computed
+    public get sortedFilteredSelectedData() {
+        return this.selectionFilters.length > 0 ?
+            // TODO simplify array flatten if possible
+            this.data.filter(m => this.dataSelectFilter(_.flatten([m])[0])) : [];
+    }
+
+    @computed
     public get selectedPositions() {
         return _.keyBy(findAllUniquePositions(this.selectionFilters).map(p => ({position: p})), 'position');
     }

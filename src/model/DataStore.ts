@@ -2,6 +2,7 @@ import {DataFilter} from "./DataFilter";
 
 export interface DataStore {
     sortedFilteredData: any[]; // TODO find a better way to define/access this data
+    sortedFilteredSelectedData: any[]; // TODO find a better way to define/access this data
     setHighlightFilters: (filters: DataFilter[]) => void;
     setSelectionFilters: (filters: DataFilter[]) => void;
     clearHighlightFilters: () => void;
