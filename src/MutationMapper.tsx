@@ -19,19 +19,6 @@ export interface IMutationMapperProps {
 export default class MutationMapper extends React.Component<IMutationMapperProps, {}>
 {
     @computed
-    get tableData(): Mutation[]
-    {
-        let data = this.props.data;
-
-        if (this.props.store && this.props.store.dataStore) {
-            data = this.props.store.dataStore.sortedFilteredSelectedData.length > 0 ?
-                this.props.store.dataStore.sortedFilteredSelectedData : this.props.store.dataStore.sortedFilteredData
-        }
-
-        return data;
-    }
-
-    @computed
     get store(): MutationMapperStore {
         return this.props.store || new DefaultMutationMapperStore(
             // TODO entrezGeneId?
@@ -43,7 +30,6 @@ export default class MutationMapper extends React.Component<IMutationMapperProps
     get mutationTable() {
         return this.props.mutationTable || (
             <DefaultMutationTable
-                data={this.tableData}
                 dataStore={this.store.dataStore}
             />
         );

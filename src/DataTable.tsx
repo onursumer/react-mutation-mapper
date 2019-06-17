@@ -8,10 +8,11 @@ import {computed} from "mobx";
 import {DataStore} from "./model/DataStore";
 import './defaultDataTable.scss';
 
-export interface IDataTableProps<T> {
-    data: T[];
-    columns?: Column<T>[];
+export interface IDataTableProps<T>
+{
+    data?: T[];
     dataStore?: DataStore;
+    columns?: Column<T>[];
     className?: string;
 
     initialSortColumn?: string;
@@ -25,6 +26,19 @@ export interface IDataTableProps<T> {
 @observer
 export default class DataTable<T> extends React.Component<IDataTableProps<T>, {}>
 {
+    @computed
+    get tableData(): T[] | undefined
+    {
+        let data = this.props.data;
+
+        if (this.props.dataStore) {
+            data = this.props.dataStore.sortedFilteredSelectedData.length > 0 ?
+                this.props.dataStore.sortedFilteredSelectedData : this.props.dataStore.sortedFilteredData
+        }
+
+        return data;
+    }
+
     public static defaultProps = {
         data: [],
         initialSortDirection: "desc",
@@ -46,14 +60,16 @@ export default class DataTable<T> extends React.Component<IDataTableProps<T>, {}
     public render()
     {
         const {
-            data,
             initialSortColumn,
             initialSortDirection,
             initialItemsPerPage,
         } = this.props;
 
-        const showPagination = data.length >
-            (this.props.initialItemsPerPage || DataTable.defaultProps.initialItemsPerPage);
+        const showPagination = this.tableData &&
+            this.tableData.length > (this.props.initialItemsPerPage || DataTable.defaultProps.initialItemsPerPage);
+
+        const defaultPageSize = this.tableData ?
+            (this.tableData.length > initialItemsPerPage! ? initialItemsPerPage : this.tableData.length) : 1;
 
         const defaultSorted = initialSortColumn ? [{
                 id: initialSortColumn,
@@ -63,11 +79,11 @@ export default class DataTable<T> extends React.Component<IDataTableProps<T>, {}
         return (
             <div className={classnames(this.props.className, 'cbioportal-frontend', 'default-data-table')}>
                 <ReactTable
-                    data={data}
+                    data={this.tableData}
                     columns={this.columns}
                     getTrProps={this.needToCustomizeRowStyle ? this.getTrProps : undefined}
                     defaultSorted={defaultSorted}
-                    defaultPageSize={data.length > initialItemsPerPage! ? initialItemsPerPage : data.length}
+                    defaultPageSize={defaultPageSize}
                     showPagination={showPagination}
                     className="-striped -highlight"
                     previousText="<"
