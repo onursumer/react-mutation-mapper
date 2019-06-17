@@ -3,13 +3,15 @@ import {observer} from "mobx-react";
 import * as React from "react";
 
 import MutationStatus from "./component/column/MutationStatus";
+import MutationType from "./component/column/MutationType";
 import ProteinChange, {proteinChangeSortMethod} from "./component/column/ProteinChange";
 import {Mutation} from "./model/Mutation";
 import DataTable, {IDataTableProps} from "./DataTable";
 
 export enum MutationColumn {
     PROTEIN_CHANGE = "proteinChange",
-    MUTATION_STATUS = "mutationStatus"
+    MUTATION_STATUS = "mutationStatus",
+    MUTATION_TYPE = "mutationType"
 }
 
 @observer
@@ -33,6 +35,12 @@ export default class DefaultMutationTable extends React.Component<IDataTableProp
                 accessor: MutationColumn.MUTATION_STATUS,
                 Cell: (column: any) => <MutationStatus mutation={column.original} />,
                 Header: "Mutation Status"
+            },
+            {
+                id: MutationColumn.MUTATION_TYPE,
+                accessor: MutationColumn.MUTATION_TYPE,
+                Cell: (column: any) => <MutationType mutation={column.original} />,
+                Header: "Mutation Type"
             }
         ];
     }

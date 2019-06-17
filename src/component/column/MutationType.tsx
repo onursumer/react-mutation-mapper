@@ -123,7 +123,7 @@ function getMapEntry(mutation: Mutation)
 }
 
 
-export default class MutationTypeColumnFormatter extends React.Component<IMutationTypeProps, {}>
+export default class MutationType extends React.Component<IMutationTypeProps, {}>
 {
     public render()
     {
