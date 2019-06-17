@@ -1,13 +1,13 @@
+import {calcProteinChangeSortValue} from "cbioportal-frontend-commons";
 import * as React from "react";
+
 import {Mutation} from "../../model/Mutation";
+import {defaultSortMethod} from "../../util/ReactTableUtils";
+import styles from './proteinChange.module.scss';
 
 interface IProteinChangeProps {
     mutation: Mutation;
 }
-
-import styles from './proteinChange.module.scss';
-import {defaultSortMethod} from "../../util/ReactTableUtils";
-import {calcProteinChangeSortValue} from "cbioportal-frontend-commons";
 
 export function proteinChangeSortMethod(a: string, b: string)
 {
