@@ -27,7 +27,7 @@ export class DefaultMutationMapperDataStore implements DataStore
 
     @computed
     public get sortedFilteredData() {
-        return this.selectionFilters.length > 0 ? this.data.filter(this.dataSelectFilter) : this.data;
+        return this.data;
     }
 
     @computed

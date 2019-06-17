@@ -54,6 +54,13 @@ class DefaultMutationTableComponent extends DataTable<Mutation> {}
 export default class DefaultMutationTable extends React.Component<IDataTableProps<Mutation>, {}>
 {
     @computed
+    get tableData(): Mutation[]
+    {
+        return this.props.dataStore && this.props.dataStore.selectionFilters.length > 0 ?
+            this.props.data.filter(m => this.props.dataStore!.dataSelectFilter(m)) : this.props.data;
+    }
+
+    @computed
     get columns() {
         return [
             {
@@ -107,6 +114,7 @@ export default class DefaultMutationTable extends React.Component<IDataTableProp
         return (
             <DefaultMutationTableComponent
                 {...this.props}
+                data={this.tableData}
                 columns={this.columns}
             />
         );
