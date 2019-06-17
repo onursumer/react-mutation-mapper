@@ -11,7 +11,12 @@ import DataTable, {IDataTableProps} from "./DataTable";
 export enum MutationColumn {
     PROTEIN_CHANGE = "proteinChange",
     MUTATION_STATUS = "mutationStatus",
-    MUTATION_TYPE = "mutationType"
+    MUTATION_TYPE = "mutationType",
+    CHROMOSOME = "chromosome",
+    START_POSITION = "startPosition",
+    END_POSITION = "endPosition",
+    REFERENCE_ALLELE = "referenceAllele",
+    VARIANT_ALLELE = "variantAllele"
 }
 
 @observer
@@ -41,6 +46,31 @@ export default class DefaultMutationTable extends React.Component<IDataTableProp
                 accessor: MutationColumn.MUTATION_TYPE,
                 Cell: (column: any) => <MutationType mutation={column.original} />,
                 Header: "Mutation Type"
+            },
+            {
+                id: MutationColumn.CHROMOSOME,
+                accessor: MutationColumn.CHROMOSOME,
+                Header: "Chromosome"
+            },
+            {
+                id: MutationColumn.START_POSITION,
+                accessor: MutationColumn.START_POSITION,
+                Header: "Start Pos"
+            },
+            {
+                id: MutationColumn.END_POSITION,
+                accessor: MutationColumn.END_POSITION,
+                Header: "End Pos"
+            },
+            {
+                id: MutationColumn.REFERENCE_ALLELE,
+                accessor: MutationColumn.REFERENCE_ALLELE,
+                Header: "Ref"
+            },
+            {
+                id: MutationColumn.VARIANT_ALLELE,
+                accessor: MutationColumn.VARIANT_ALLELE,
+                Header: "Var"
             }
         ];
     }
