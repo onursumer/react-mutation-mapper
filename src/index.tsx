@@ -1,3 +1,5 @@
+export {default as ColumnHeader} from "./component/column/ColumnHeader";
+
 export {default as Domain} from "./Domain";
 export {default as HotspotInfo} from "./HotspotInfo";
 export {default as Lollipop} from "./Lollipop";
