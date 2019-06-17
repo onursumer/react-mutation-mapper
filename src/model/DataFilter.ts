@@ -7,6 +7,6 @@ export type DataFilter = {
     oncokb?: OncoKbFilter[];
 }
 
-export type CustomFilterApplier = <T>(filter: DataFilter,
-                                      datum: T,
-                                      positions: {[position: string]: {position: number}}) => boolean;
+export type CustomFilterApplier = (filter: DataFilter,
+                                   datum: any,
+                                   positions: {[position: string]: {position: number}}) => boolean;

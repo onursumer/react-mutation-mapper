@@ -6,6 +6,7 @@ import MobxPromise, {cached} from "mobxpromise";
 import {remoteData} from "cbioportal-frontend-commons";
 
 import {AggregatedHotspots, Hotspot, IHotspotIndex} from "../model/CancerHotspot";
+import {DataFilter} from "../model/DataFilter";
 import DataStore from "../model/DataStore";
 import {EnsemblTranscript} from "../model/EnsemblTranscript";
 import {Gene} from "../model/Gene";
@@ -18,11 +19,16 @@ import {
     defaultHotspotFilter,
     groupCancerHotspotDataByPosition,
     groupHotspotsByMutations,
-    indexHotspotsData
+    indexHotspotsData,
+    isHotspot
 } from "../util/CancerHotspotsUtils";
 import {ONCOKB_DEFAULT_DATA} from "../util/DataFetcherUtils";
 import {groupMutationsByProteinStartPos} from "../util/MutationUtils";
-import {defaultOncoKbIndicatorFilter, groupOncoKbIndicatorDataByMutations} from "../util/OncoKbUtils";
+import {
+    defaultOncoKbFilter,
+    defaultOncoKbIndicatorFilter,
+    groupOncoKbIndicatorDataByMutations
+} from "../util/OncoKbUtils";
 import {groupPtmDataByPosition, groupPtmDataByTypeAndPosition} from "../util/PtmUtils";
 import {DefaultMutationMapperDataStore} from "./DefaultMutationMapperDataStore";
 import {DefaultMutationMapperDataFetcher} from "./DefaultMutationMapperDataFetcher";
@@ -70,7 +76,7 @@ class DefaultMutationMapperStore implements MutationMapperStore
 
     @cached
     public get dataStore(): DataStore {
-        return new DefaultMutationMapperDataStore(this.mutations);
+        return new DefaultMutationMapperDataStore(this.mutations, this.customFilterApplier);
     }
 
     @computed
@@ -435,6 +441,40 @@ class DefaultMutationMapperStore implements MutationMapperStore
     protected getDefaultEntrezGeneId(mutation: Mutation): number {
         // assuming all mutations in this store is for the same gene
         return this.gene.entrezGeneId || (mutation.gene && mutation.gene.entrezGeneId) || 0;
+    }
+
+    @autobind
+    protected customFilterApplier(filter: DataFilter,
+                                  mutation: Mutation,
+                                  positions: {[position: string]: {position: number}})
+    {
+        let pick = false;
+
+        if (filter.position) {
+            pick = !!positions[mutation.proteinPosStart+""];
+        }
+
+        if (pick &&
+            filter.hotspot &&
+            this.indexedHotspotData.result)
+        {
+            // TODO for now ignoring the actual filter value and treating as a boolean
+            pick = isHotspot(mutation, this.indexedHotspotData.result, defaultHotspotFilter);
+        }
+
+        if (pick &&
+            filter.oncokb &&
+            this.oncoKbData.result &&
+            !(this.oncoKbData.result instanceof Error))
+        {
+            // TODO for now ignoring the actual filter value and treating as a boolean
+            pick = defaultOncoKbFilter(mutation,
+                this.oncoKbData.result,
+                this.getDefaultTumorType,
+                this.getDefaultEntrezGeneId);
+        }
+
+        return pick;
     }
 }
 
