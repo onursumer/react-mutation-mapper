@@ -77,7 +77,7 @@ export default class DataTable<T> extends React.Component<IDataTableProps<T>, {}
 
     @computed
     get pageSize() {
-        return !this.showPagination && this.tableData ? this.tableData.length : this.defaultPageSize;
+        return !this.showPagination && this.tableData ? this.tableData.length : undefined;
     }
 
     public render()
