@@ -75,11 +75,6 @@ export default class DataTable<T> extends React.Component<IDataTableProps<T>, {}
             (this.tableData.length > initialItemsPerPage! ? initialItemsPerPage : this.tableData.length) : 1;
     }
 
-    @computed
-    get pageSize() {
-        return !this.showPagination && this.tableData ? this.tableData.length : undefined;
-    }
-
     public render()
     {
         const {
@@ -100,7 +95,6 @@ export default class DataTable<T> extends React.Component<IDataTableProps<T>, {}
                     getTrProps={this.needToCustomizeRowStyle ? this.getTrProps : undefined}
                     defaultSorted={defaultSorted}
                     defaultPageSize={this.defaultPageSize}
-                    pageSize={this.pageSize}
                     showPagination={this.showPagination}
                     className="-striped -highlight"
                     previousText="<"
