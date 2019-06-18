@@ -5,7 +5,10 @@ import MobxPromise, {cached} from "mobxpromise";
 
 import {remoteData} from "cbioportal-frontend-commons";
 
-import {AggregatedHotspots, Hotspot, IHotspotIndex} from "../model/CancerHotspot";
+// TODO define VariantAnnotation model?
+import {VariantAnnotation} from "../generated/GenomeNexusAPI";
+
+import {AggregatedHotspots, GenomicLocation, Hotspot, IHotspotIndex} from "../model/CancerHotspot";
 import {DataFilter} from "../model/DataFilter";
 import DataStore from "../model/DataStore";
 import {EnsemblTranscript} from "../model/EnsemblTranscript";
@@ -23,7 +26,8 @@ import {
     isHotspot
 } from "../util/CancerHotspotsUtils";
 import {ONCOKB_DEFAULT_DATA} from "../util/DataFetcherUtils";
-import {groupMutationsByProteinStartPos} from "../util/MutationUtils";
+import {getMutationsToTranscriptId} from "../util/MutationAnnotator";
+import {genomicLocationString, groupMutationsByProteinStartPos, uniqueGenomicLocations} from "../util/MutationUtils";
 import {
     defaultOncoKbFilter,
     defaultOncoKbIndicatorFilter,
@@ -79,6 +83,7 @@ class DefaultMutationMapperStore implements MutationMapperStore
         return new DefaultMutationMapperDataStore(this.mutations, this.customFilterApplier);
     }
 
+    // TODO replace this with the one in cbioportal mutations?
     @computed
     public get mutations(): Mutation[] {
         return this.getMutations();
@@ -295,6 +300,43 @@ class DefaultMutationMapperStore implements MutationMapperStore
         }
     }, undefined);
 
+    readonly transcriptsWithAnnotations = remoteData<string[] | undefined>({
+        await: () => [
+            this.indexedVariantAnnotations,
+            this.allTranscripts,
+            this.transcriptsWithProteinLength
+        ],
+        invoke: async()=>{
+            if (this.indexedVariantAnnotations.result && this.allTranscripts.result && this.transcriptsWithProteinLength.result && this.transcriptsWithProteinLength.result.length > 0) {
+                // ignore transcripts without protein length
+                // TODO: better solution is to show only mutations table, not lollipop plot for those transcripts
+                const transcripts:string[] = _.uniq([].concat.apply([], uniqueGenomicLocations(this.getMutations()).map(
+                    (gl: GenomicLocation) => {
+                        if (this.indexedVariantAnnotations.result && this.indexedVariantAnnotations.result[genomicLocationString(gl)]) {
+                            return this.indexedVariantAnnotations.result[genomicLocationString(gl)].transcript_consequences.map(
+                                (tc: {transcript_id: string}) => tc.transcript_id
+                            ).filter(
+                                (transcriptId: string) => this.transcriptsWithProteinLength.result!!.includes(transcriptId)
+                            );
+                        } else {
+                            return [];
+                        }
+                    })));
+                // makes sure the annotations are actually of the form we are displaying (e.g. nonsynonymous)
+                return transcripts.filter((t:string) => (
+                    getMutationsToTranscriptId(this.getMutations(),
+                        t,
+                        this.indexedVariantAnnotations.result!!).length > 0
+                ));
+            } else {
+                return [];
+            }
+        },
+        onError: () => {
+            throw new Error("Failed to get transcriptsWithAnnotations");
+        }
+    }, undefined);
+
     readonly ptmData: MobxPromise<PostTranslationalModification[]> = remoteData({
         await: () => [
             this.mutationData
@@ -427,6 +469,33 @@ class DefaultMutationMapperStore implements MutationMapperStore
                 defaultOncoKbIndicatorFilter);
         }
         else {
+            return {};
+        }
+    }
+
+    readonly indexedVariantAnnotations = remoteData<{[genomicLocation: string]: VariantAnnotation} | undefined>({
+        invoke: async () => this.mutations ?
+            await this.dataFetcher.fetchVariantAnnotationsIndexedByGenomicLocation(
+                this.mutations, ["annotation_summary", "hotspots"], this.isoformOverrideSource) :
+            undefined,
+        onError: () => {
+            // fail silently, leave the error handling responsibility to the data consumer
+        }
+    }, undefined);
+
+    @computed
+    get mutationsByTranscriptId(): {[transcriptId:string]: Mutation[]} {
+        if (this.indexedVariantAnnotations.result && this.transcriptsWithAnnotations.result) {
+            return _.fromPairs(
+                this.transcriptsWithAnnotations.result.map((t:string) => (
+                    [t,
+                        getMutationsToTranscriptId(this.getMutations(),
+                            t,
+                            this.indexedVariantAnnotations.result!!)
+                    ]
+                ))
+            );
+        } else {
             return {};
         }
     }
