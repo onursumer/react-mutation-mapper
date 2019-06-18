@@ -7,6 +7,7 @@ export interface DataStore {
     setSelectionFilters: (filters: DataFilter[]) => void;
     clearHighlightFilters: () => void;
     clearSelectionFilters: () => void;
+    dataFilters: DataFilter[];
     selectionFilters: DataFilter[];
     highlightFilters: DataFilter[];
     isPositionSelected: (position: number) => boolean;

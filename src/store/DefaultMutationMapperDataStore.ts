@@ -8,6 +8,7 @@ import {findAllUniquePositions} from "../util/FilterUtils";
 
 export class DefaultMutationMapperDataStore implements DataStore
 {
+    @observable public dataFilters: DataFilter[] = [];
     @observable public selectionFilters: DataFilter[] = [];
     @observable public highlightFilters: DataFilter[] = [];
 
@@ -26,8 +27,14 @@ export class DefaultMutationMapperDataStore implements DataStore
     }
 
     @computed
+    public get filteredData() {
+        return this.dataFilters.length > 0 ?
+            this.data.filter(m => this.dataMainFilter(_.flatten([m])[0])): this.data;
+    }
+
+    @computed
     public get sortedFilteredData() {
-        return this.data;
+        return this.filteredData;
     }
 
     @computed
@@ -73,6 +80,16 @@ export class DefaultMutationMapperDataStore implements DataStore
 
     public isPositionHighlighted(position: number) {
         return !!this.highlightedPositions[position+""];
+    }
+
+    public dataMainFilter(mutation: Mutation): boolean
+    {
+        return (
+            this.dataFilters.length > 0 &&
+            !this.dataFilters
+                .map(dataFilter => this.applyFilter(dataFilter, mutation, this.selectedPositions))
+                .includes(false)
+        );
     }
 
     public dataSelectFilter(mutation: Mutation): boolean

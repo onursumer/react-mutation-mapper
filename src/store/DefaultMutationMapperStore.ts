@@ -448,7 +448,7 @@ class DefaultMutationMapperStore implements MutationMapperStore
                                   mutation: Mutation,
                                   positions: {[position: string]: {position: number}})
     {
-        let pick = false;
+        let pick = true;
 
         if (filter.position) {
             pick = !!positions[mutation.proteinPosStart+""];
@@ -472,6 +472,15 @@ class DefaultMutationMapperStore implements MutationMapperStore
                 this.oncoKbData.result,
                 this.getDefaultTumorType,
                 this.getDefaultEntrezGeneId);
+        }
+
+        if (pick &&
+            filter.mutation)
+        {
+            // TODO add a separate function to apply mutation filters
+            pick = !filter.mutation
+                .map(f => f.mutationType === undefined || mutation.mutationType === f.mutationType)
+                .includes(false);
         }
 
         return pick;
