@@ -26,6 +26,14 @@ export interface IDataTableProps<T>
 @observer
 export default class DataTable<T> extends React.Component<IDataTableProps<T>, {}>
 {
+    public static defaultProps = {
+        data: [],
+        initialSortDirection: "desc",
+        initialItemsPerPage: 10,
+        highlightColorLight: "#B0BED9",
+        highlightColorDark: "#9FAFD1"
+    };
+
     @computed
     get tableData(): T[] | undefined
     {
@@ -39,14 +47,6 @@ export default class DataTable<T> extends React.Component<IDataTableProps<T>, {}
         return data;
     }
 
-    public static defaultProps = {
-        data: [],
-        initialSortDirection: "desc",
-        initialItemsPerPage: 10,
-        highlightColorLight: "#B0BED9",
-        highlightColorDark: "#9FAFD1"
-    };
-
     @computed
     get columns(): Column[] {
         return this.props.columns || [];
@@ -57,19 +57,35 @@ export default class DataTable<T> extends React.Component<IDataTableProps<T>, {}
         return this.props.dataStore && this.props.dataStore.highlightFilters;
     }
 
+    @computed
+    get showPagination() {
+        const initialItemsPerPage = this.props.initialItemsPerPage;
+
+        return (
+            this.tableData !== undefined &&
+            this.tableData.length > initialItemsPerPage!
+        );
+    }
+
+    @computed
+    get defaultPageSize() {
+        const initialItemsPerPage = this.props.initialItemsPerPage;
+
+        return this.tableData ?
+            (this.tableData.length > initialItemsPerPage! ? initialItemsPerPage : this.tableData.length) : 1;
+    }
+
+    @computed
+    get pageSize() {
+        return !this.showPagination && this.tableData ? this.tableData.length : this.defaultPageSize;
+    }
+
     public render()
     {
         const {
             initialSortColumn,
-            initialSortDirection,
-            initialItemsPerPage,
+            initialSortDirection
         } = this.props;
-
-        const showPagination = this.tableData &&
-            this.tableData.length > (this.props.initialItemsPerPage || DataTable.defaultProps.initialItemsPerPage);
-
-        const defaultPageSize = this.tableData ?
-            (this.tableData.length > initialItemsPerPage! ? initialItemsPerPage : this.tableData.length) : 1;
 
         const defaultSorted = initialSortColumn ? [{
                 id: initialSortColumn,
@@ -83,8 +99,9 @@ export default class DataTable<T> extends React.Component<IDataTableProps<T>, {}
                     columns={this.columns}
                     getTrProps={this.needToCustomizeRowStyle ? this.getTrProps : undefined}
                     defaultSorted={defaultSorted}
-                    defaultPageSize={defaultPageSize}
-                    showPagination={showPagination}
+                    defaultPageSize={this.defaultPageSize}
+                    pageSize={this.pageSize}
+                    showPagination={this.showPagination}
                     className="-striped -highlight"
                     previousText="<"
                     nextText=">"
