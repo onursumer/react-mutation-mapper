@@ -58,15 +58,34 @@ class DefaultMutationMapperStore implements MutationMapperStore
     @computed
     public get activeTranscript(): string | undefined
     {
+        let activeTranscript;
+        const canonicalTranscriptId = !this.canonicalTranscript.isPending && this.canonicalTranscript.result ?
+            this.canonicalTranscript.result.transcriptId : undefined;
+
         if (this._activeTranscript !== undefined) {
-            return this._activeTranscript;
+            activeTranscript = this._activeTranscript;
         }
-        else if (!this.canonicalTranscript.isPending && this.canonicalTranscript.result) {
-            return this.canonicalTranscript.result.transcriptId;
+        else if (this.config.filterMutationsBySelectedTranscript)
+        {
+            if (this.transcriptsWithAnnotations.result &&
+                this.transcriptsWithAnnotations.result.length > 0 &&
+                canonicalTranscriptId &&
+                !this.transcriptsWithAnnotations.result.includes(canonicalTranscriptId))
+            {
+                // if there are annotated transcripts and activeTranscript does
+                // not have any, change the active transcript
+                activeTranscript = this.transcriptsWithAnnotations.result[0];
+            }
+            else {
+                activeTranscript = canonicalTranscriptId;
+            }
         }
         else {
-            return undefined;
+            activeTranscript = canonicalTranscriptId;
         }
+
+        // TODO this.activeTranscript = activeTranscript?
+        return activeTranscript;
     }
 
     public set activeTranscript(transcript: string | undefined) {
@@ -83,10 +102,27 @@ class DefaultMutationMapperStore implements MutationMapperStore
         return new DefaultMutationMapperDataStore(this.mutations, this.customFilterApplier);
     }
 
-    // TODO replace this with the one in cbioportal mutations?
     @computed
-    public get mutations(): Mutation[] {
-        return this.getMutations();
+    public get mutations(): Mutation[]
+    {
+        if (this.canonicalTranscript.isPending ||
+            (this.config.filterMutationsBySelectedTranscript &&
+                (this.transcriptsWithAnnotations.isPending || this.indexedVariantAnnotations.isPending)))
+        {
+            return [];
+        }
+        else if (this.config.filterMutationsBySelectedTranscript &&
+            this.activeTranscript &&
+            this.indexedVariantAnnotations.result &&
+            !_.isEmpty(this.indexedVariantAnnotations.result))
+        {
+            return getMutationsToTranscriptId(this.getMutations(),
+                this.activeTranscript,
+                this.indexedVariantAnnotations.result);
+        }
+        else {
+            return this.getMutations();
+        }
     }
 
     @computed
@@ -128,9 +164,13 @@ class DefaultMutationMapperStore implements MutationMapperStore
     }
 
     readonly mutationData = remoteData({
-        await: () => [
-            this.canonicalTranscript
-        ],
+        await: () => {
+            if (this.config.filterMutationsBySelectedTranscript) {
+                return [this.canonicalTranscript, this.indexedVariantAnnotations];
+            } else {
+                return [this.canonicalTranscript];
+            }
+        },
         invoke: async () => {
             return this.mutations;
         }
@@ -307,7 +347,11 @@ class DefaultMutationMapperStore implements MutationMapperStore
             this.transcriptsWithProteinLength
         ],
         invoke: async()=>{
-            if (this.indexedVariantAnnotations.result && this.allTranscripts.result && this.transcriptsWithProteinLength.result && this.transcriptsWithProteinLength.result.length > 0) {
+            if (this.indexedVariantAnnotations.result &&
+                this.allTranscripts.result &&
+                this.transcriptsWithProteinLength.result &&
+                this.transcriptsWithProteinLength.result.length > 0)
+            {
                 // ignore transcripts without protein length
                 // TODO: better solution is to show only mutations table, not lollipop plot for those transcripts
                 const transcripts:string[] = _.uniq([].concat.apply([], uniqueGenomicLocations(this.getMutations()).map(
@@ -326,7 +370,7 @@ class DefaultMutationMapperStore implements MutationMapperStore
                 return transcripts.filter((t:string) => (
                     getMutationsToTranscriptId(this.getMutations(),
                         t,
-                        this.indexedVariantAnnotations.result!!).length > 0
+                        this.indexedVariantAnnotations.result!).length > 0
                 ));
             } else {
                 return [];
@@ -474,9 +518,9 @@ class DefaultMutationMapperStore implements MutationMapperStore
     }
 
     readonly indexedVariantAnnotations = remoteData<{[genomicLocation: string]: VariantAnnotation} | undefined>({
-        invoke: async () => this.mutations ?
+        invoke: async () => this.getMutations() ?
             await this.dataFetcher.fetchVariantAnnotationsIndexedByGenomicLocation(
-                this.mutations, ["annotation_summary", "hotspots"], this.isoformOverrideSource) :
+                this.getMutations(), ["annotation_summary", "hotspots"], this.isoformOverrideSource) :
             undefined,
         onError: () => {
             // fail silently, leave the error handling responsibility to the data consumer

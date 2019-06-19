@@ -18,6 +18,7 @@ export type MutationMapperProps = {
     mutationRates?: MutationRate[];
     showTranscriptDropDown?: boolean;
     showOnlyAnnotatedTranscriptsInDropdown?: boolean;
+    filterMutationsBySelectedTranscript?: boolean;
     loadingIndicator?: JSX.Element;
 };
 
@@ -29,11 +30,14 @@ export default class MutationMapper extends React.Component<MutationMapperProps,
         return this.props.store || new DefaultMutationMapperStore(
             // TODO entrezGeneId?
             {hugoGeneSymbol: this.props.hugoSymbol} as any,
-            {isoformOverrideSource: "mskcc"},
+            {
+                isoformOverrideSource: "mskcc",
+                filterMutationsBySelectedTranscript: this.props.filterMutationsBySelectedTranscript
+            },
             () => this.props.data);
     }
 
-    get mutationTable() {
+    get mutationTableComponent() {
         return this.props.mutationTable || (
             <DefaultMutationTable
                 dataStore={this.store.dataStore}
@@ -75,9 +79,36 @@ export default class MutationMapper extends React.Component<MutationMapperProps,
         return this.props.mutationRates ? <DefaultMutationRateSummary rates={this.props.mutationRates} /> : null;
     }
 
-    // TODO add missing components!
-    render() {
+    get isMutationTableDataLoading() {
+        // Child classes should override this method
+        return false;
+    }
+
+    get mutationTable(): JSX.Element|null
+    {
         return (
+            <span>
+                {this.mutationTableComponent}
+            </span>
+        );
+    }
+
+    get isMutationPlotDataLoading() {
+        return this.store.pfamDomainData.isPending;
+    }
+
+    get isLoading() {
+        return this.store.mutationData.isPending || this.isMutationPlotDataLoading || this.isMutationTableDataLoading;
+    }
+
+    get loadingIndicator() {
+        return this.props.loadingIndicator || <i className="fa fa-spinner fa-pulse fa-2x" />;
+    }
+
+    // TODO add missing components!
+    public render()
+    {
+        return this.isLoading ? this.loadingIndicator : (
             <div>
                 {/*!this.props.store.dataStore.showingAllData && this.filterResetPanel()*/}
                 <div style={{ display:'flex' }}>

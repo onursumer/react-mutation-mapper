@@ -85,7 +85,7 @@ export class DefaultMutationMapperDataFetcher
     public async fetchVariantAnnotationsIndexedByGenomicLocation(mutations: Partial<Mutation>[],
                                                                  fields: string[] = ["annotation_summary"],
                                                                  isoformOverrideSource: string = "uniprot",
-                                                                 client: GenomeNexusAPIInternal = this.genomeNexusInternalClient)
+                                                                 client: GenomeNexusAPI = this.genomeNexusClient)
     {
         return await fetchVariantAnnotationsIndexedByGenomicLocation(mutations, fields, isoformOverrideSource, client);
     }
