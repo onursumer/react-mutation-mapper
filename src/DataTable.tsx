@@ -8,7 +8,7 @@ import {computed} from "mobx";
 import {DataStore} from "./model/DataStore";
 import './defaultDataTable.scss';
 
-export interface IDataTableProps<T>
+export type DataTableProps<T> =
 {
     data?: T[];
     dataStore?: DataStore;
@@ -21,10 +21,10 @@ export interface IDataTableProps<T>
 
     highlightColorLight?: string;
     highlightColorDark?: string;
-}
+};
 
 @observer
-export default class DataTable<T> extends React.Component<IDataTableProps<T>, {}>
+export default class DataTable<T> extends React.Component<DataTableProps<T>, {}>
 {
     public static defaultProps = {
         data: [],

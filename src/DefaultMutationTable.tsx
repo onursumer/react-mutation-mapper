@@ -6,7 +6,7 @@ import MutationStatus from "./component/column/MutationStatus";
 import MutationType from "./component/column/MutationType";
 import ProteinChange, {proteinChangeSortMethod} from "./component/column/ProteinChange";
 import {Mutation} from "./model/Mutation";
-import DataTable, {IDataTableProps} from "./DataTable";
+import DataTable, {DataTableProps} from "./DataTable";
 import ColumnHeader from "./component/column/ColumnHeader";
 
 export enum MutationColumn {
@@ -51,7 +51,7 @@ const HEADERS = {
 class DefaultMutationTableComponent extends DataTable<Mutation> {}
 
 @observer
-export default class DefaultMutationTable extends React.Component<IDataTableProps<Mutation>, {}>
+export default class DefaultMutationTable extends React.Component<DataTableProps<Mutation>, {}>
 {
     @computed
     get columns() {

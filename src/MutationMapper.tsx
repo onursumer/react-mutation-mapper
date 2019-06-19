@@ -1,4 +1,4 @@
-import {computed} from "mobx";
+import {action, computed} from "mobx";
 import {observer} from "mobx-react";
 import * as React from "react";
 
@@ -6,21 +6,23 @@ import {Mutation} from "./model/Mutation";
 import MutationMapperStore from "./model/MutationMapperStore";
 import DefaultMutationMapperStore from "./store/DefaultMutationMapperStore";
 import LollipopMutationPlot from "./LollipopMutationPlot";
+import DefaultMutationRateSummary, {MutationRate} from "./DefaultMutationRateSummary";
 import DefaultMutationTable from "./DefaultMutationTable";
 import GeneSummary from "./GeneSummary";
 
-export interface IMutationMapperProps {
+export type MutationMapperProps = {
     hugoSymbol: string;
     data: Mutation[];
     store?: MutationMapperStore;
     mutationTable?: JSX.Element;
+    mutationRates?: MutationRate[];
     showTranscriptDropDown?: boolean;
     showOnlyAnnotatedTranscriptsInDropdown?: boolean;
     loadingIndicator?: JSX.Element;
-}
+};
 
 @observer
-export default class MutationMapper extends React.Component<IMutationMapperProps, {}>
+export default class MutationMapper extends React.Component<MutationMapperProps, {}>
 {
     @computed
     get store(): MutationMapperStore {
@@ -64,8 +66,13 @@ export default class MutationMapper extends React.Component<IMutationMapperProps
                 transcriptsWithAnnotations={this.store.transcriptsWithAnnotations}
                 transcriptsWithProteinLength={this.store.transcriptsWithProteinLength}
                 mutationsByTranscriptId={this.store.mutationsByTranscriptId}
+                onTranscriptChange={this.handleTranscriptChange}
             />
         );
+    }
+
+    get mutationRateSummary(): JSX.Element|null {
+        return this.props.mutationRates ? <DefaultMutationRateSummary rates={this.props.mutationRates} /> : null;
     }
 
     // TODO add missing components!
@@ -80,14 +87,20 @@ export default class MutationMapper extends React.Component<IMutationMapperProps
                     </div>
                     <div className="mutationMapperMetaColumn">
                         {this.geneSummary}
-                        {/*this.mutationRateSummary*/}
+                        {this.mutationRateSummary}
                         {/*this.proteinImpactTypePanel*/}
                         {/*this.view3dButton*/}
                     </div>
                 </div>
-                <hr style={{ marginTop: "2rem" }} />
                 {this.mutationTable}
             </div>
         );
+    }
+
+    @action.bound
+    private handleTranscriptChange(transcriptId: string)
+    {
+        this.store.activeTranscript = transcriptId;
+        // this.close3dPanel();
     }
 }

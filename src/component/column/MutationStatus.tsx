@@ -4,11 +4,11 @@ import * as React from "react";
 import {Mutation} from "../../model/Mutation";
 import styles from "./mutationStatus.module.scss";
 
-interface IMutationStatusProps {
+type MutationStatusProps = {
     mutation: Mutation;
-}
+};
 
-export default class MutationStatus extends React.Component<IMutationStatusProps, {}>
+export default class MutationStatus extends React.Component<MutationStatusProps, {}>
 {
     public render() {
         const value = this.props.mutation.mutationStatus;

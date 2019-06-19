@@ -1,3 +1,4 @@
+import classNames from "classnames";
 import _ from "lodash";
 import {observer} from "mobx-react";
 import * as React from "react";
@@ -8,9 +9,9 @@ import {VariantAnnotation} from "./generated/GenomeNexusAPI";
 import {EnsemblTranscript} from "./model/EnsemblTranscript";
 import {RemoteData} from "./model/RemoteData";
 import {Mutation} from "./model/Mutation";
+import styles from "./transcriptDropdown.module.scss";
 
-
-export interface ITranscriptDropdownProps {
+export type TranscriptDropdownProps = {
     showDropDown: boolean;
     showOnlyAnnotatedTranscriptsInDropdown: boolean;
     activeTranscript?: string;
@@ -20,11 +21,12 @@ export interface ITranscriptDropdownProps {
     transcriptsWithAnnotations: RemoteData<string[] | undefined>;
     indexedVariantAnnotations: RemoteData<{[genomicLocation: string]: VariantAnnotation} | undefined>;
     mutationsByTranscriptId?: {[transcriptId: string]: Mutation[]};
+    onChange: (value: string) => void;
     loadingIndicator?: JSX.Element;
-}
+};
 
 @observer
-export default class TranscriptDropdown extends React.Component<ITranscriptDropdownProps, {}>
+export default class TranscriptDropdown extends React.Component<TranscriptDropdownProps, {}>
 {
     public render()
     {
@@ -55,7 +57,7 @@ export default class TranscriptDropdown extends React.Component<ITranscriptDropd
                 transcriptsWithAnnotations.result.length > 0;
 
             return (
-                <div style={{paddingBottom:10}}>
+                <div className={classNames("small", styles.dropDown)}>
                     {this.loadingIndicator(isLoading)}
                     {(!isLoading && requiredData) && (
                         this.getDropdownTranscripts(activeTranscript || canonicalTranscriptId!,
@@ -74,7 +76,7 @@ export default class TranscriptDropdown extends React.Component<ITranscriptDropd
                 transcriptsWithProteinLength.result.length > 0 &&
                 canonicalTranscriptId;
             return (
-                <div style={{paddingBottom:10}}>
+                <div className={classNames("small", styles.dropDown)}>
                     {this.loadingIndicator(isLoading)}
                     {(!isLoading && requiredData) && (
                         this.getDropdownTranscripts(activeTranscript || canonicalTranscriptId!!,
@@ -120,9 +122,7 @@ export default class TranscriptDropdown extends React.Component<ITranscriptDropd
                     }
                     onChange={(option:any) => {
                         if (option.value) {
-                            // TODO this.props.onChange(value);
-                            // this.props.store.activeTranscript = option.value;
-                            // this.close3dPanel();
+                            this.props.onChange(option.value);
                         }
                     }}
                 />

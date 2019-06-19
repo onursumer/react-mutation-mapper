@@ -4,16 +4,16 @@ import * as React from 'react';
 import styles from "./mutationType.module.scss";
 import {Mutation} from "../../model/Mutation";
 
-interface IMutationTypeProps {
+type MutationTypeProps = {
     mutation: Mutation;
-}
+};
 
-interface IMutationTypeFormat {
+type MutationTypeFormat = {
     label?: string;
     className: string;
 }
 
-export const MAIN_MUTATION_TYPE_MAP: {[key: string]: IMutationTypeFormat} =
+export const MAIN_MUTATION_TYPE_MAP: {[key: string]: MutationTypeFormat} =
 {
     missense: {
         label: "Missense",
@@ -85,7 +85,7 @@ export const MAIN_MUTATION_TYPE_MAP: {[key: string]: IMutationTypeFormat} =
  */
 function getDisplayValue(mutation: Mutation): string
 {
-    const entry: IMutationTypeFormat|undefined = getMapEntry(mutation);
+    const entry: MutationTypeFormat|undefined = getMapEntry(mutation);
 
     // first, try to find a mapped value
     if (entry && entry.label) {
@@ -99,7 +99,7 @@ function getDisplayValue(mutation: Mutation): string
 
 function getClassName(mutation: Mutation): string
 {
-    const value: IMutationTypeFormat|undefined = getMapEntry(mutation);
+    const value: MutationTypeFormat|undefined = getMapEntry(mutation);
 
     if (value && value.className) {
         return value.className;
@@ -123,7 +123,7 @@ function getMapEntry(mutation: Mutation)
 }
 
 
-export default class MutationType extends React.Component<IMutationTypeProps, {}>
+export default class MutationType extends React.Component<MutationTypeProps, {}>
 {
     public render()
     {

@@ -1,14 +1,13 @@
 import {DefaultTooltip} from "cbioportal-frontend-commons";
 import * as React from "react";
 
-export interface IColumnHeaderProps
-{
+export type ColumnHeaderProps = {
     headerContent: string | JSX.Element;
     overlay?: JSX.Element;
     className?: string;
-}
+};
 
-class ColumnHeader extends React.Component<IColumnHeaderProps>
+class ColumnHeader extends React.Component<ColumnHeaderProps>
 {
     public static defaultProps = {
         className: "text-wrap"

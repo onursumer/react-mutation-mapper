@@ -7,9 +7,9 @@ import {RemoteData} from "./model/RemoteData";
 import TranscriptDropdown from "./TranscriptDropdown";
 import {VariantAnnotation} from "./generated/GenomeNexusAPI";
 import {Mutation} from "./model/Mutation";
+import styles from "./geneSummary.module.scss";
 
-
-export interface IGeneSummaryProps {
+export type GeneSummaryProps = {
     hugoGeneSymbol: string;
     uniprotId?: string;
     showDropDown: boolean;
@@ -21,13 +21,13 @@ export interface IGeneSummaryProps {
     transcriptsWithAnnotations: RemoteData<string[] | undefined>;
     indexedVariantAnnotations: RemoteData<{[genomicLocation: string]: VariantAnnotation} | undefined>;
     mutationsByTranscriptId?: {[transcriptId: string]: Mutation[]};
+    onTranscriptChange: (transcriptId: string) => void;
     loadingIndicator?: JSX.Element;
-}
+};
 
 @observer
-export default class GeneSummary extends React.Component<IGeneSummaryProps, {}>
+export default class GeneSummary extends React.Component<GeneSummaryProps, {}>
 {
-    // TODO add styling
     public render()
     {
         const {
@@ -42,6 +42,7 @@ export default class GeneSummary extends React.Component<IGeneSummaryProps, {}>
             transcriptsWithProteinLength,
             indexedVariantAnnotations,
             mutationsByTranscriptId,
+            onTranscriptChange,
             loadingIndicator
         } = this.props;
 
@@ -54,8 +55,12 @@ export default class GeneSummary extends React.Component<IGeneSummaryProps, {}>
         const ccdsId = transcript && transcript.ccdsId;
 
         return (
-            <div style={{'paddingBottom':10}}>
-                <h4>{hugoGeneSymbol}</h4>
+            <div className={styles.geneSummary}>
+                <h4
+                    className={styles.hugoSymbol}
+                >
+                    {hugoGeneSymbol}
+                </h4>
                 <TranscriptDropdown
                     showDropDown={showDropDown}
                     showOnlyAnnotatedTranscriptsInDropdown={showOnlyAnnotatedTranscriptsInDropdown}
@@ -66,6 +71,7 @@ export default class GeneSummary extends React.Component<IGeneSummaryProps, {}>
                     transcriptsWithAnnotations={transcriptsWithAnnotations}
                     indexedVariantAnnotations={indexedVariantAnnotations}
                     mutationsByTranscriptId={mutationsByTranscriptId}
+                    onChange={onTranscriptChange}
                     loadingIndicator={loadingIndicator}
                 />
                 <div>

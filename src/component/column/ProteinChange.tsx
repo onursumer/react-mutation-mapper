@@ -5,9 +5,9 @@ import {Mutation} from "../../model/Mutation";
 import {defaultSortMethod} from "../../util/ReactTableUtils";
 import styles from './proteinChange.module.scss';
 
-interface IProteinChangeProps {
+type ProteinChangeProps = {
     mutation: Mutation;
-}
+};
 
 export function proteinChangeSortMethod(a: string, b: string)
 {
@@ -17,7 +17,7 @@ export function proteinChangeSortMethod(a: string, b: string)
     );
 }
 
-export default class ProteinChange extends React.Component<IProteinChangeProps, {}>
+export default class ProteinChange extends React.Component<ProteinChangeProps, {}>
 {
     public render() {
         // use text as display value
