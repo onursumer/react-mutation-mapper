@@ -12,29 +12,39 @@ import GeneSummary from "./GeneSummary";
 
 export type MutationMapperProps = {
     hugoSymbol: string;
-    data: Mutation[];
+    data: Partial<Mutation>[];
     store?: MutationMapperStore;
     mutationTable?: JSX.Element;
     mutationRates?: MutationRate[];
+    // TODO annotateMutations?: boolean;
     showTranscriptDropDown?: boolean;
     showOnlyAnnotatedTranscriptsInDropdown?: boolean;
     filterMutationsBySelectedTranscript?: boolean;
+    isoformOverrideSource?: string;
     loadingIndicator?: JSX.Element;
 };
 
 @observer
 export default class MutationMapper extends React.Component<MutationMapperProps, {}>
 {
+    public static defaultProps: Partial<MutationMapperProps> = {
+        showOnlyAnnotatedTranscriptsInDropdown: false,
+        showTranscriptDropDown: false,
+        filterMutationsBySelectedTranscript: false,
+    };
+
     @computed
     get store(): MutationMapperStore {
         return this.props.store || new DefaultMutationMapperStore(
-            // TODO entrezGeneId?
-            {hugoGeneSymbol: this.props.hugoSymbol} as any,
             {
-                isoformOverrideSource: "mskcc",
+                // TODO entrezGeneId: ???,
+                hugoGeneSymbol: this.props.hugoSymbol
+            },
+            {
+                isoformOverrideSource: this.props.isoformOverrideSource,
                 filterMutationsBySelectedTranscript: this.props.filterMutationsBySelectedTranscript
             },
-            () => this.props.data);
+            () => this.props.data as Mutation[]);
     }
 
     get mutationTableComponent() {
@@ -132,6 +142,6 @@ export default class MutationMapper extends React.Component<MutationMapperProps,
     private handleTranscriptChange(transcriptId: string)
     {
         this.store.activeTranscript = transcriptId;
-        // this.close3dPanel();
+        // TODO this.close3dPanel();
     }
 }
