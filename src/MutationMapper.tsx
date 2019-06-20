@@ -1,7 +1,8 @@
-import {action, computed} from "mobx";
+import {action, computed, observable} from "mobx";
 import {observer} from "mobx-react";
 import * as React from "react";
 
+import {MobxCache} from "./model/MobxCache";
 import {Mutation} from "./model/Mutation";
 import MutationMapperStore from "./model/MutationMapperStore";
 import DefaultMutationMapperStore from "./store/DefaultMutationMapperStore";
@@ -9,13 +10,17 @@ import LollipopMutationPlot from "./LollipopMutationPlot";
 import DefaultMutationRateSummary, {MutationRate} from "./DefaultMutationRateSummary";
 import DefaultMutationTable from "./DefaultMutationTable";
 import GeneSummary from "./GeneSummary";
+import {TrackVisibility} from "./TrackSelector";
+import {initDefaultTrackVisibility} from "./util/TrackUtils";
 
 export type MutationMapperProps = {
     hugoSymbol: string;
     data: Partial<Mutation>[];
     store?: MutationMapperStore;
+    trackVisibility?: TrackVisibility;
     mutationTable?: JSX.Element;
     mutationRates?: MutationRate[];
+    pubMedCache?: MobxCache;
     // TODO annotateMutations?: boolean;
     showTranscriptDropDown?: boolean;
     showOnlyAnnotatedTranscriptsInDropdown?: boolean;
@@ -28,10 +33,35 @@ export type MutationMapperProps = {
 export default class MutationMapper extends React.Component<MutationMapperProps, {}>
 {
     public static defaultProps: Partial<MutationMapperProps> = {
+        // TODO pubMedCache
         showOnlyAnnotatedTranscriptsInDropdown: false,
         showTranscriptDropDown: false,
         filterMutationsBySelectedTranscript: false,
     };
+
+    @observable
+    private _trackVisibility: TrackVisibility | undefined;
+
+    @computed
+    get geneWidth(){
+        // TODO return WindowStore.size.width * 0.7 - this.lollipopPlotGeneX;
+        return 666;
+    }
+
+    @computed
+    protected get trackVisibility(): TrackVisibility
+    {
+        if (this.props.trackVisibility) {
+            return this.props.trackVisibility!;
+        }
+        else {
+            if (!this._trackVisibility) {
+                this._trackVisibility = initDefaultTrackVisibility();
+            }
+
+            return this._trackVisibility;
+        }
+    }
 
     @computed
     get store(): MutationMapperStore {
@@ -47,6 +77,19 @@ export default class MutationMapper extends React.Component<MutationMapperProps,
             () => this.props.data as Mutation[]);
     }
 
+    // TODO for this we need to implement data table items label first...
+    // @computed
+    // get multipleMutationInfo(): string {
+    //     const count = this.store.dataStore.duplicateMutationCountInMultipleSamples;
+    //     const mutationsLabel = count === 1 ? "mutation" : "mutations";
+    //
+    //     return count > 0 ? `: includes ${count} duplicate ${mutationsLabel} in patients with multiple samples` : "";
+    // }
+    //
+    // @computed get itemsLabelPlural(): string {
+    //     return `Mutations${this.multipleMutationInfo}`;
+    // }
+
     get mutationTableComponent() {
         return this.props.mutationTable || (
             <DefaultMutationTable
@@ -59,7 +102,13 @@ export default class MutationMapper extends React.Component<MutationMapperProps,
         return (
             <LollipopMutationPlot
                 store={this.store}
-                geneWidth={666}
+                pubMedCache={this.props.pubMedCache}
+                geneWidth={this.geneWidth}
+                trackVisibility={this.trackVisibility}
+                // TODO set more props
+                // onXAxisOffset={this.onXAxisOffset}
+                // trackDataStatus={this.trackDataStatus}
+                // onTrackVisibilityChange={this.onTrackVisibilityChange}
             />
         );
     }
@@ -139,7 +188,7 @@ export default class MutationMapper extends React.Component<MutationMapperProps,
     }
 
     @action.bound
-    private handleTranscriptChange(transcriptId: string)
+    protected handleTranscriptChange(transcriptId: string)
     {
         this.store.activeTranscript = transcriptId;
         // TODO this.close3dPanel();
