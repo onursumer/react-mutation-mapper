@@ -26,7 +26,8 @@ export type MutationMapperProps = {
     showOnlyAnnotatedTranscriptsInDropdown?: boolean;
     filterMutationsBySelectedTranscript?: boolean;
     isoformOverrideSource?: string;
-    loadingIndicator?: JSX.Element;
+    mainLoadingIndicator?: JSX.Element;
+    geneSummaryLoadingIndicator?: JSX.Element;
 };
 
 @observer
@@ -123,7 +124,7 @@ export default class MutationMapper extends React.Component<MutationMapperProps,
                 showOnlyAnnotatedTranscriptsInDropdown={!!this.props.showOnlyAnnotatedTranscriptsInDropdown}
                 transcriptsByTranscriptId={this.store.transcriptsByTranscriptId}
                 canonicalTranscript={this.store.canonicalTranscript}
-                loadingIndicator={this.props.loadingIndicator}
+                loadingIndicator={this.props.geneSummaryLoadingIndicator}
                 activeTranscript={this.store.activeTranscript}
                 indexedVariantAnnotations={this.store.indexedVariantAnnotations}
                 transcriptsWithAnnotations={this.store.transcriptsWithAnnotations}
@@ -161,7 +162,7 @@ export default class MutationMapper extends React.Component<MutationMapperProps,
     }
 
     get loadingIndicator() {
-        return this.props.loadingIndicator || <i className="fa fa-spinner fa-pulse fa-2x" />;
+        return this.props.mainLoadingIndicator || <i className="fa fa-spinner fa-pulse fa-2x" />;
     }
 
     // TODO add missing components!
