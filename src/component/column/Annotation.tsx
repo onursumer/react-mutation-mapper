@@ -1,0 +1,154 @@
+import _ from "lodash";
+import * as React from "react";
+
+import {IHotspotIndex} from "../../model/CancerHotspot";
+import {MobxCache} from "../../model/MobxCache";
+import {Mutation} from "../../model/Mutation";
+import {RemoteData} from "../../model/RemoteData";
+import {CancerGene, IndicatorQueryResp, IOncoKbData} from "../../model/OncoKb";
+import {is3dHotspot, isRecurrentHotspot} from "../../util/CancerHotspotsUtils";
+import {getIndicatorData} from "../../util/OncoKbUtils";
+import {defaultSortMethod} from "../../util/ReactTableUtils";
+
+export type AnnotationProps = {
+    mutation: Mutation;
+    enableOncoKb: boolean;
+    // enableMyCancerGenome: boolean;
+    enableHotspot: boolean;
+    // enableCivic: boolean;
+    hotspotData?: RemoteData<IHotspotIndex | undefined>;
+    oncoKbData?: RemoteData<IOncoKbData | Error>;
+    oncoKbCancerGenes?: RemoteData<CancerGene[] | Error>;
+    oncoKbEvidenceCache?: MobxCache;
+    pubMedCache?: MobxCache;
+    userEmailAddress?:string;
+    resolveEntrezGeneId?: (mutation: Mutation) => number;
+    // myCancerGenomeData?: IMyCancerGenomeData;
+    // civicGenes?: ICivicGeneDataWrapper;
+    // civicVariants?: ICivicVariantDataWrapper;
+    // studyIdToStudy?: {[studyId:string]:CancerStudy};
+};
+
+export interface IAnnotation {
+    isHotspot: boolean;
+    is3dHotspot: boolean;
+    hotspotStatus: "pending" | "error" | "complete";
+    oncoKbIndicator?: IndicatorQueryResp;
+    oncoKbStatus: "pending" | "error" | "complete";
+    oncoKbGeneExist:boolean;
+    isOncoKbCancerGene:boolean;
+    // myCancerGenomeLinks: string[];
+    // civicEntry?: ICivicEntry | null;
+    // civicStatus: "pending" | "error" | "complete";
+    // hasCivicVariants: boolean;
+    hugoGeneSymbol: string;
+}
+
+const DEFAULT_ANNOTATION_DATA: IAnnotation = {
+    oncoKbStatus: "complete",
+    oncoKbGeneExist: false,
+    isOncoKbCancerGene: false,
+    isHotspot: false,
+    is3dHotspot: false,
+    hotspotStatus: "complete",
+    hugoGeneSymbol: '',
+    // hasCivicVariants: true,
+    // myCancerGenomeLinks: [],
+    // civicStatus: "complete"
+};
+
+export function annotationAccessor(mutation?: Mutation,
+                                   oncoKbCancerGenes?: RemoteData<CancerGene[] | Error>,
+                                   hotspotData?: RemoteData<IHotspotIndex | undefined>,
+                                   // myCancerGenomeData?:IMyCancerGenomeData,
+                                   oncoKbData?: RemoteData<IOncoKbData | Error>,
+                                   // civicGenes?:ICivicGeneDataWrapper,
+                                   // civicVariants?:ICivicVariantDataWrapper,
+                                   // studyIdToStudy?: {[studyId:string]:CancerStudy},
+                                   resolveEntrezGeneId: (mutation: Mutation) => number =
+                                       (mutation: Mutation) => (mutation.gene && mutation.gene.entrezGeneId) || 0,
+                                   resolveTumorType: (mutation: Mutation) => string = () => "Unknown"): IAnnotation
+{
+    let value: Partial<IAnnotation>;
+
+    if (mutation) {
+        const entrezGeneId = resolveEntrezGeneId(mutation);
+
+        let oncoKbIndicator: IndicatorQueryResp|undefined;
+        const hugoGeneSymbol = mutation.gene ? mutation.gene.hugoGeneSymbol : undefined;
+
+        let oncoKbGeneExist = false;
+        let isOncoKbCancerGene = false;
+        if( oncoKbCancerGenes && !(oncoKbCancerGenes.result instanceof Error)) {
+            oncoKbGeneExist = _.find(oncoKbCancerGenes.result, (gene: CancerGene) => gene.oncokbAnnotated && gene.entrezGeneId === entrezGeneId) !== undefined;
+            isOncoKbCancerGene = _.find(oncoKbCancerGenes.result, (gene: CancerGene) => gene.entrezGeneId === entrezGeneId) !== undefined;
+        }
+
+        value = {
+            hugoGeneSymbol,
+            oncoKbGeneExist,
+            isOncoKbCancerGene,
+            // civicEntry: civicGenes && civicGenes.result && civicVariants && civicVariants.result ?
+            //     AnnotationColumnFormatter.getCivicEntry(mutation, civicGenes.result, civicVariants.result) : undefined,
+            // civicStatus: civicGenes && civicGenes.status && civicVariants && civicVariants.status ?
+            //     AnnotationColumnFormatter.getCivicStatus(civicGenes.status, civicVariants.status) : "pending",
+            // hasCivicVariants: true,
+            // myCancerGenomeLinks: myCancerGenomeData ?
+            //     AnnotationColumnFormatter.getMyCancerGenomeLinks(mutation, myCancerGenomeData) : [],
+            isHotspot: hotspotData && hotspotData.result && hotspotData.status === "complete" ?
+                isRecurrentHotspot(mutation, hotspotData.result) : false,
+            is3dHotspot: hotspotData && hotspotData.result && hotspotData.status === "complete" ?
+                is3dHotspot(mutation, hotspotData.result) : false,
+            hotspotStatus: hotspotData ? hotspotData.status : "pending"
+        };
+
+        // oncoKbData may exist but it might be an instance of Error, in that case we flag the status as error
+        if (oncoKbData && oncoKbData.result instanceof Error) {
+            value = {
+                ...value,
+                oncoKbStatus: "error",
+                oncoKbIndicator: undefined
+            };
+        }
+        else if (oncoKbGeneExist) {
+            // actually, oncoKbData.result shouldn't be an instance of Error in this case (we already check it above),
+            // but we need to check it again in order to avoid TS errors/warnings
+            if (oncoKbData &&
+                oncoKbData.result &&
+                !(oncoKbData.result instanceof Error) &&
+                oncoKbData.status === "complete")
+            {
+                oncoKbIndicator = getIndicatorData(mutation, oncoKbData.result, resolveTumorType, resolveEntrezGeneId);
+            }
+
+            value = {
+                ...value,
+                oncoKbStatus: oncoKbData ? oncoKbData.status : "pending",
+                oncoKbIndicator,
+            };
+        } else {
+            value = {
+                ...value,
+                oncoKbStatus: "complete",
+                oncoKbIndicator: undefined
+            };
+        }
+    }
+    else {
+        value = DEFAULT_ANNOTATION_DATA;
+    }
+
+    return value as IAnnotation;
+}
+
+export function annotationSortMethod(a: string, b: string)
+{
+    return defaultSortMethod(a, b);
+}
+
+export default class Annotation extends React.Component<AnnotationProps, {}>
+{
+    public render() {
+        return null;
+    }
+}

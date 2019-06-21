@@ -8,9 +8,11 @@ import ProteinChange, {proteinChangeSortMethod} from "./component/column/Protein
 import {Mutation} from "./model/Mutation";
 import DataTable, {DataTableProps} from "./DataTable";
 import ColumnHeader from "./component/column/ColumnHeader";
+import Annotation, {annotationSortMethod} from "./component/column/Annotation";
 
 export enum MutationColumn {
     PROTEIN_CHANGE = "proteinChange",
+    ANNOTATION = "annotation",
     MUTATION_STATUS = "mutationStatus",
     MUTATION_TYPE = "mutationType",
     CHROMOSOME = "chromosome",
@@ -23,6 +25,9 @@ export enum MutationColumn {
 const HEADERS = {
     [MutationColumn.PROTEIN_CHANGE]: (
         <ColumnHeader headerContent={<span>Protein Change</span>} />
+    ),
+    [MutationColumn.ANNOTATION]: (
+        <ColumnHeader headerContent={<span>Annotation</span>} />
     ),
     [MutationColumn.MUTATION_STATUS]: (
         <ColumnHeader headerContent={<span>MS</span>} overlay={<span>Mutation Status</span>} />
@@ -62,6 +67,17 @@ export default class DefaultMutationTable extends React.Component<DataTableProps
                 Cell: (column: any) => <ProteinChange mutation={column.original} />,
                 Header: HEADERS[MutationColumn.PROTEIN_CHANGE],
                 sortMethod: proteinChangeSortMethod
+            },
+            {
+                id: MutationColumn.ANNOTATION,
+                Cell: (column: any) =>
+                    <Annotation
+                        mutation={column.original}
+                        enableOncoKb={true}
+                        enableHotspot={true}
+                    />,
+                Header: HEADERS[MutationColumn.ANNOTATION],
+                sortMethod: annotationSortMethod
             },
             {
                 id: MutationColumn.MUTATION_TYPE,
