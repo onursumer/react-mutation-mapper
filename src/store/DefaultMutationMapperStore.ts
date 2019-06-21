@@ -40,6 +40,7 @@ import {DefaultMutationMapperDataFetcher} from "./DefaultMutationMapperDataFetch
 interface DefaultMutationMapperStoreConfig {
     isoformOverrideSource?: string;
     filterMutationsBySelectedTranscript?: boolean;
+    genomeNexusUrl?: string;
 }
 
 class DefaultMutationMapperStore implements MutationMapperStore
@@ -127,7 +128,9 @@ class DefaultMutationMapperStore implements MutationMapperStore
 
     @computed
     public get dataFetcher(): DefaultMutationMapperDataFetcher {
-        return new DefaultMutationMapperDataFetcher({});
+        return new DefaultMutationMapperDataFetcher({
+            genomeNexusUrl: this.config.genomeNexusUrl
+        });
     }
 
     @computed

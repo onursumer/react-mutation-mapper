@@ -3,7 +3,7 @@ import DataStore from "./DataStore";
 import {Gene} from "./Gene";
 import {EnsemblTranscript} from "./EnsemblTranscript";
 import {Mutation} from "./Mutation";
-import {IndicatorQueryResp} from "./OncoKb";
+import {CancerGene, IndicatorQueryResp, IOncoKbData} from "./OncoKb";
 import {PfamDomain} from "./Pfam";
 import {PostTranslationalModification} from "./PostTranslationalModification";
 import {RemoteData} from "./RemoteData";
@@ -26,6 +26,8 @@ export interface MutationMapperStore {
     ptmDataByTypeAndProteinPosStart: RemoteData<{[type: string] : {[position: number] : PostTranslationalModification[]}} | undefined>;
     indexedHotspotData: RemoteData<IHotspotIndex | undefined>;
     hotspotsByPosition: {[pos: number]: Hotspot[]};
+    oncoKbCancerGenes: RemoteData<CancerGene[] | Error | undefined>;
+    oncoKbData: RemoteData<IOncoKbData | Error | undefined>;
     oncoKbDataByPosition: {[pos: number]: IndicatorQueryResp[]};
     indexedVariantAnnotations: RemoteData<{[genomicLocation: string]: VariantAnnotation} | undefined>;
     transcriptsWithAnnotations: RemoteData<string[] | undefined>;

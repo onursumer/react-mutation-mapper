@@ -22,6 +22,7 @@ export type MutationMapperProps = {
     mutationRates?: MutationRate[];
     pubMedCache?: MobxCache;
     // TODO annotateMutations?: boolean;
+    genomeNexusUrl?: string;
     showTranscriptDropDown?: boolean;
     showOnlyAnnotatedTranscriptsInDropdown?: boolean;
     filterMutationsBySelectedTranscript?: boolean;
@@ -73,7 +74,8 @@ export default class MutationMapper extends React.Component<MutationMapperProps,
             },
             {
                 isoformOverrideSource: this.props.isoformOverrideSource,
-                filterMutationsBySelectedTranscript: this.props.filterMutationsBySelectedTranscript
+                filterMutationsBySelectedTranscript: this.props.filterMutationsBySelectedTranscript,
+                genomeNexusUrl: this.props.genomeNexusUrl
             },
             () => this.props.data as Mutation[]);
     }
@@ -95,6 +97,9 @@ export default class MutationMapper extends React.Component<MutationMapperProps,
         return this.props.mutationTable || (
             <DefaultMutationTable
                 dataStore={this.store.dataStore}
+                hotspotData={this.store.indexedHotspotData}
+                oncoKbData={this.store.oncoKbData}
+                oncoKbCancerGenes={this.store.oncoKbCancerGenes}
             />
         );
     }

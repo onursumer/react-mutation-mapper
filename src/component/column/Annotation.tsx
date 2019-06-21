@@ -1,4 +1,6 @@
+import {generateQueryVariant} from "cbioportal-frontend-commons";
 import _ from "lodash";
+import {observer} from "mobx-react";
 import * as React from "react";
 
 import {IHotspotIndex} from "../../model/CancerHotspot";
@@ -9,6 +11,8 @@ import {CancerGene, IndicatorQueryResp, IOncoKbData} from "../../model/OncoKb";
 import {is3dHotspot, isRecurrentHotspot} from "../../util/CancerHotspotsUtils";
 import {getIndicatorData} from "../../util/OncoKbUtils";
 import {defaultSortMethod} from "../../util/ReactTableUtils";
+import HotspotAnnotation from "./HotspotAnnotation";
+import OncoKB from "../oncokb/OncoKB";
 
 export type AnnotationProps = {
     mutation: Mutation;
@@ -17,12 +21,13 @@ export type AnnotationProps = {
     enableHotspot: boolean;
     // enableCivic: boolean;
     hotspotData?: RemoteData<IHotspotIndex | undefined>;
-    oncoKbData?: RemoteData<IOncoKbData | Error>;
-    oncoKbCancerGenes?: RemoteData<CancerGene[] | Error>;
+    oncoKbData?: RemoteData<IOncoKbData | Error | undefined>;
+    oncoKbCancerGenes?: RemoteData<CancerGene[] | Error | undefined>;
     oncoKbEvidenceCache?: MobxCache;
     pubMedCache?: MobxCache;
     userEmailAddress?:string;
     resolveEntrezGeneId?: (mutation: Mutation) => number;
+    resolveTumorType?: (mutation: Mutation) => string;
     // myCancerGenomeData?: IMyCancerGenomeData;
     // civicGenes?: ICivicGeneDataWrapper;
     // civicVariants?: ICivicVariantDataWrapper;
@@ -57,17 +62,24 @@ const DEFAULT_ANNOTATION_DATA: IAnnotation = {
     // civicStatus: "complete"
 };
 
+function getDefaultEntrezGeneId(mutation: Mutation): number {
+    return  (mutation.gene && mutation.gene.entrezGeneId) || 0;
+}
+
+function getDefaultTumorType(): string {
+    return "Unknown";
+}
+
 export function annotationAccessor(mutation?: Mutation,
-                                   oncoKbCancerGenes?: RemoteData<CancerGene[] | Error>,
+                                   oncoKbCancerGenes?: RemoteData<CancerGene[] | Error | undefined>,
                                    hotspotData?: RemoteData<IHotspotIndex | undefined>,
                                    // myCancerGenomeData?:IMyCancerGenomeData,
-                                   oncoKbData?: RemoteData<IOncoKbData | Error>,
+                                   oncoKbData?: RemoteData<IOncoKbData | Error | undefined>,
                                    // civicGenes?:ICivicGeneDataWrapper,
                                    // civicVariants?:ICivicVariantDataWrapper,
                                    // studyIdToStudy?: {[studyId:string]:CancerStudy},
-                                   resolveEntrezGeneId: (mutation: Mutation) => number =
-                                       (mutation: Mutation) => (mutation.gene && mutation.gene.entrezGeneId) || 0,
-                                   resolveTumorType: (mutation: Mutation) => string = () => "Unknown"): IAnnotation
+                                   resolveTumorType: (mutation: Mutation) => string = getDefaultTumorType,
+                                   resolveEntrezGeneId: (mutation: Mutation) => number = getDefaultEntrezGeneId): IAnnotation
 {
     let value: Partial<IAnnotation>;
 
@@ -119,6 +131,14 @@ export function annotationAccessor(mutation?: Mutation,
                 oncoKbData.status === "complete")
             {
                 oncoKbIndicator = getIndicatorData(mutation, oncoKbData.result, resolveTumorType, resolveEntrezGeneId);
+
+                // TODO this is required for cbioportal, we should probably do this in a custom resolveTumorType method
+                // if (indicator && indicator.query.tumorType === null && studyIdToStudy) {
+                //     const studyMetaData = studyIdToStudy[mutation.studyId];
+                //     if (studyMetaData.cancerTypeId !== "mixed") {
+                //         indicator.query.tumorType = studyMetaData.cancerType.name;
+                //     }
+                // }
             }
 
             value = {
@@ -146,9 +166,88 @@ export function annotationSortMethod(a: string, b: string)
     return defaultSortMethod(a, b);
 }
 
+@observer
 export default class Annotation extends React.Component<AnnotationProps, {}>
 {
     public render() {
-        return null;
+        const annotation = this.getAnnotationData(this.props);
+        const evidenceQuery = this.getEvidenceQuery(this.props.mutation,
+            this.props.resolveEntrezGeneId,
+            this.props.resolveTumorType);
+
+        return (
+            <span style={{display:'inline-block', minWidth:100}}>
+                {
+                    this.props.enableOncoKb &&
+                    <OncoKB
+                        hugoGeneSymbol={annotation.hugoGeneSymbol}
+                        geneNotExist={!annotation.oncoKbGeneExist}
+                        isCancerGene={annotation.isOncoKbCancerGene}
+                        status={annotation.oncoKbStatus}
+                        indicator={annotation.oncoKbIndicator}
+                        evidenceCache={this.props.oncoKbEvidenceCache}
+                        evidenceQuery={evidenceQuery as any} // TODO as Query
+                        pubMedCache={this.props.pubMedCache}
+                        userEmailAddress={this.props.userEmailAddress}
+                    />
+                }
+                {
+                 //   this.props.enableCivic &&
+                 //   <Civic
+                 //       civicEntry={annotation.civicEntry}
+                 //       civicStatus={annotation.civicStatus}
+                 //       hasCivicVariants={annotation.hasCivicVariants}
+                 //   />
+                }
+                {
+                //    this.props.enableMyCancerGenome &&
+                //    <MyCancerGenome
+                //        linksHTML={annotation.myCancerGenomeLinks}
+                //    />
+                }
+                {
+                    this.props.enableHotspot &&
+                    <HotspotAnnotation
+                        isHotspot={annotation.isHotspot}
+                        is3dHotspot={annotation.is3dHotspot}
+                        status={annotation.hotspotStatus}
+                    />
+                }
+            </span>
+        );
+    }
+
+    private getAnnotationData(props: AnnotationProps)
+    {
+        const {
+            mutation,
+            oncoKbCancerGenes,
+            hotspotData,
+            oncoKbData,
+            resolveEntrezGeneId,
+            resolveTumorType
+        } = props;
+
+        return annotationAccessor(
+            mutation,
+            oncoKbCancerGenes,
+            hotspotData,
+            oncoKbData,
+            resolveTumorType,
+            resolveEntrezGeneId);
+    }
+
+    // TODO partial duplicate of DefaultMutationMapperDataFetcher.fetchOncoKbData, move into a utility function
+    private getEvidenceQuery(mutation: Mutation,
+                             resolveEntrezGeneId: (mutation: Mutation) => number = getDefaultEntrezGeneId,
+                             resolveTumorType: (mutation: Mutation) => string = getDefaultTumorType)
+    {
+        return generateQueryVariant(
+            resolveEntrezGeneId(mutation),
+            resolveTumorType(mutation),
+            mutation.proteinChange,
+            mutation.mutationType,
+            mutation.proteinPosStart,
+            mutation.proteinPosEnd);
     }
 }
