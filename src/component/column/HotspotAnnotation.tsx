@@ -14,6 +14,21 @@ export interface ICancerHotspotsProps {
     is3dHotspot: boolean;
 }
 
+export function sortValue(isHotspot: boolean, is3dHotspot: boolean): number
+{
+    let score:number = 0;
+
+    if (isHotspot) {
+        score += 1;
+    }
+
+    if (is3dHotspot) {
+        score += 0.5;
+    }
+
+    return score;
+}
+
 export function placeArrow(tooltipEl: any) {
     const arrowEl = tooltipEl.querySelector('.rc-tooltip-arrow');
     arrowEl.style.left = '10px';
@@ -21,21 +36,6 @@ export function placeArrow(tooltipEl: any) {
 
 export default class HotspotAnnotation extends React.Component<ICancerHotspotsProps, {}>
 {
-    public static sortValue(isHotspot:boolean, is3dHotspot:boolean):number
-    {
-        let score:number = 0;
-
-        if (isHotspot) {
-            score += 1;
-        }
-
-        if (is3dHotspot) {
-            score += 0.5;
-        }
-
-        return score;
-    }
-
     constructor(props: ICancerHotspotsProps)
     {
         super(props);

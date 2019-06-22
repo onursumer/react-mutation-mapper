@@ -11,7 +11,7 @@ import {CancerGene, IOncoKbData} from "./model/OncoKb";
 import {RemoteData} from "./model/RemoteData";
 import DataTable, {DataTableProps} from "./DataTable";
 import ColumnHeader from "./component/column/ColumnHeader";
-import Annotation, {annotationSortMethod} from "./component/column/Annotation";
+import Annotation, {annotationSortMethod, getAnnotationData} from "./component/column/Annotation";
 
 export type DefaultMutationTableProps = {
     hotspotData?: RemoteData<IHotspotIndex | undefined>;
@@ -79,6 +79,14 @@ export default class DefaultMutationTable extends React.Component<DefaultMutatio
             },
             {
                 id: MutationColumn.ANNOTATION,
+                // TODO workaround: returning a function as an accessor to make sorting works,
+                // there might be a better way to fix this problem
+                accessor: (mutation: Mutation) => () => getAnnotationData(
+                    mutation,
+                    this.props.oncoKbCancerGenes,
+                    this.props.hotspotData,
+                    this.props.oncoKbData
+                ),
                 Cell: (column: any) =>
                     <Annotation
                         mutation={column.original}

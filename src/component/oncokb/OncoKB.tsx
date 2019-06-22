@@ -48,6 +48,19 @@ function getOncogenicIconsStyle(indicator: IndicatorQueryResp | undefined)
     };
 }
 
+export function sortValue(indicator?: IndicatorQueryResp|undefined|null): number[]
+{
+    const values: number[] = [0, 0, 0];
+
+    if (indicator) {
+        values[0] = calcOncogenicScore(indicator.oncogenic);
+        values[1] = calcSensitivityLevelScore(indicator.highestSensitiveLevel);
+        values[2] = calcResistanceLevelScore(indicator.highestResistanceLevel);
+    }
+
+    return values;
+}
+
 export function hideArrow(tooltipEl: any) {
     const arrowEl = tooltipEl.querySelector('.rc-tooltip-arrow');
     arrowEl.style.display = 'none';
@@ -58,17 +71,6 @@ export default class OncoKB extends React.Component<IOncoKbProps, {}>
 {
     @observable showFeedback:boolean = false;
     @observable tooltipDataLoadComplete:boolean = false;
-
-    public static sortValue(indicator?: IndicatorQueryResp|undefined|null): number[]
-    {
-        const values: number[] = [0, 0, 0];
-        if (indicator) {
-            values[0] = calcOncogenicScore(indicator.oncogenic);
-            values[1] = calcSensitivityLevelScore(indicator.highestSensitiveLevel);
-            values[2] = calcResistanceLevelScore(indicator.highestResistanceLevel);
-        }
-        return values;
-    }
 
     public static download(indicator?: IndicatorQueryResp|undefined|null): string
     {

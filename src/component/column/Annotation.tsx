@@ -10,9 +10,9 @@ import {RemoteData} from "../../model/RemoteData";
 import {CancerGene, IndicatorQueryResp, IOncoKbData} from "../../model/OncoKb";
 import {is3dHotspot, isRecurrentHotspot} from "../../util/CancerHotspotsUtils";
 import {getIndicatorData} from "../../util/OncoKbUtils";
-import {defaultSortMethod} from "../../util/ReactTableUtils";
-import HotspotAnnotation from "./HotspotAnnotation";
-import OncoKB from "../oncokb/OncoKB";
+import {defaultArraySortMethod} from "../../util/ReactTableUtils";
+import HotspotAnnotation, {sortValue as hotspotSortValue} from "./HotspotAnnotation";
+import OncoKB, {sortValue as oncoKbSortValue} from "../oncokb/OncoKB";
 
 export type AnnotationProps = {
     mutation: Mutation;
@@ -25,13 +25,13 @@ export type AnnotationProps = {
     oncoKbCancerGenes?: RemoteData<CancerGene[] | Error | undefined>;
     oncoKbEvidenceCache?: MobxCache;
     pubMedCache?: MobxCache;
-    userEmailAddress?:string;
     resolveEntrezGeneId?: (mutation: Mutation) => number;
     resolveTumorType?: (mutation: Mutation) => string;
     // myCancerGenomeData?: IMyCancerGenomeData;
     // civicGenes?: ICivicGeneDataWrapper;
     // civicVariants?: ICivicVariantDataWrapper;
     // studyIdToStudy?: {[studyId:string]:CancerStudy};
+    userEmailAddress?:string;
 };
 
 export interface IAnnotation {
@@ -70,16 +70,30 @@ function getDefaultTumorType(): string {
     return "Unknown";
 }
 
-export function annotationAccessor(mutation?: Mutation,
-                                   oncoKbCancerGenes?: RemoteData<CancerGene[] | Error | undefined>,
-                                   hotspotData?: RemoteData<IHotspotIndex | undefined>,
-                                   // myCancerGenomeData?:IMyCancerGenomeData,
-                                   oncoKbData?: RemoteData<IOncoKbData | Error | undefined>,
-                                   // civicGenes?:ICivicGeneDataWrapper,
-                                   // civicVariants?:ICivicVariantDataWrapper,
-                                   // studyIdToStudy?: {[studyId:string]:CancerStudy},
-                                   resolveTumorType: (mutation: Mutation) => string = getDefaultTumorType,
-                                   resolveEntrezGeneId: (mutation: Mutation) => number = getDefaultEntrezGeneId): IAnnotation
+// TODO partial duplicate of DefaultMutationMapperDataFetcher.fetchOncoKbData, move into a utility function
+function getEvidenceQuery(mutation: Mutation,
+                          resolveEntrezGeneId: (mutation: Mutation) => number = getDefaultEntrezGeneId,
+                          resolveTumorType: (mutation: Mutation) => string = getDefaultTumorType)
+{
+    return generateQueryVariant(
+        resolveEntrezGeneId(mutation),
+        resolveTumorType(mutation),
+        mutation.proteinChange,
+        mutation.mutationType,
+        mutation.proteinPosStart,
+        mutation.proteinPosEnd);
+}
+
+export function getAnnotationData(mutation?: Mutation,
+                                  oncoKbCancerGenes?: RemoteData<CancerGene[] | Error | undefined>,
+                                  hotspotData?: RemoteData<IHotspotIndex | undefined>,
+                                  // myCancerGenomeData?:IMyCancerGenomeData,
+                                  oncoKbData?: RemoteData<IOncoKbData | Error | undefined>,
+                                  // civicGenes?:ICivicGeneDataWrapper,
+                                  // civicVariants?:ICivicVariantDataWrapper,
+                                  // studyIdToStudy?: {[studyId:string]:CancerStudy},
+                                  resolveTumorType: (mutation: Mutation) => string = getDefaultTumorType,
+                                  resolveEntrezGeneId: (mutation: Mutation) => number = getDefaultEntrezGeneId): IAnnotation
 {
     let value: Partial<IAnnotation>;
 
@@ -161,9 +175,19 @@ export function annotationAccessor(mutation?: Mutation,
     return value as IAnnotation;
 }
 
-export function annotationSortMethod(a: string, b: string)
+export function annotationSortMethod(a: () => IAnnotation, b: () => IAnnotation)
 {
-    return defaultSortMethod(a, b);
+    return defaultArraySortMethod(sortValue(a()), sortValue(b()));
+}
+
+export function sortValue(annotation: IAnnotation): number[]
+{
+    return _.flatten([
+        oncoKbSortValue(annotation.oncoKbIndicator),
+        // Civic.sortValue(annotationData.civicEntry),
+        // MyCancerGenome.sortValue(annotationData.myCancerGenomeLinks),
+        hotspotSortValue(annotation.isHotspot, annotation.is3dHotspot), annotation.isOncoKbCancerGene ? 1 : 0
+    ]);
 }
 
 @observer
@@ -171,7 +195,7 @@ export default class Annotation extends React.Component<AnnotationProps, {}>
 {
     public render() {
         const annotation = this.getAnnotationData(this.props);
-        const evidenceQuery = this.getEvidenceQuery(this.props.mutation,
+        const evidenceQuery = getEvidenceQuery(this.props.mutation,
             this.props.resolveEntrezGeneId,
             this.props.resolveTumorType);
 
@@ -228,26 +252,12 @@ export default class Annotation extends React.Component<AnnotationProps, {}>
             resolveTumorType
         } = props;
 
-        return annotationAccessor(
+        return getAnnotationData(
             mutation,
             oncoKbCancerGenes,
             hotspotData,
             oncoKbData,
             resolveTumorType,
             resolveEntrezGeneId);
-    }
-
-    // TODO partial duplicate of DefaultMutationMapperDataFetcher.fetchOncoKbData, move into a utility function
-    private getEvidenceQuery(mutation: Mutation,
-                             resolveEntrezGeneId: (mutation: Mutation) => number = getDefaultEntrezGeneId,
-                             resolveTumorType: (mutation: Mutation) => string = getDefaultTumorType)
-    {
-        return generateQueryVariant(
-            resolveEntrezGeneId(mutation),
-            resolveTumorType(mutation),
-            mutation.proteinChange,
-            mutation.mutationType,
-            mutation.proteinPosStart,
-            mutation.proteinPosEnd);
     }
 }
