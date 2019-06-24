@@ -1,12 +1,15 @@
 import autobind from "autobind-decorator";
-import * as React from 'react';
-import {observer} from "mobx-react";
-import ReactTable, {Column, RowInfo} from "react-table";
 import classnames from "classnames";
+import _ from "lodash";
 import {computed} from "mobx";
+import {observer} from "mobx-react";
+import * as React from 'react';
+import ReactTable, {Column, RowInfo} from "react-table";
 
 import {DataStore} from "./model/DataStore";
+import {RemoteData} from "./model/RemoteData";
 import './defaultDataTable.scss';
+import {getRemoteDataGroupStatus} from "./util/RemoteDataUtils";
 
 export type DataTableProps<T> =
 {
@@ -15,6 +18,7 @@ export type DataTableProps<T> =
     columns?: Column<T>[];
     className?: string;
 
+    initialSortColumnData?: (RemoteData<any>|undefined)[];
     initialSortColumn?: string;
     initialSortDirection?: 'asc'|'desc';
     initialItemsPerPage?: number;
@@ -22,6 +26,10 @@ export type DataTableProps<T> =
     highlightColorLight?: string;
     highlightColorDark?: string;
 };
+
+export function getInitialColumnDataStatus(initialSortColumnData?: (RemoteData<any>|undefined)[]) {
+    return initialSortColumnData ? getRemoteDataGroupStatus(_.compact(initialSortColumnData)) : "complete";
+}
 
 @observer
 export default class DataTable<T> extends React.Component<DataTableProps<T>, {}>
@@ -75,25 +83,38 @@ export default class DataTable<T> extends React.Component<DataTableProps<T>, {}>
             (this.tableData.length > initialItemsPerPage! ? initialItemsPerPage : this.tableData.length) : 1;
     }
 
-    public render()
-    {
+    @computed
+    get initialColumnDataStatus() {
+        return getInitialColumnDataStatus(this.props.initialSortColumnData);
+    }
+
+    @computed
+    get defaultSorted() {
         const {
             initialSortColumn,
             initialSortDirection
         } = this.props;
 
-        const defaultSorted = initialSortColumn ? [{
+        if (initialSortColumn === undefined || this.initialColumnDataStatus === "pending") {
+            return undefined;
+        }
+        else {
+            return [{
                 id: initialSortColumn,
                 desc: initialSortDirection === 'desc'
-            }] : undefined;
+            }];
+        }
+    }
 
+    public render()
+    {
         return (
             <div className={classnames(this.props.className, 'cbioportal-frontend', 'default-data-table')}>
                 <ReactTable
                     data={this.tableData}
                     columns={this.columns}
                     getTrProps={this.needToCustomizeRowStyle ? this.getTrProps : undefined}
-                    defaultSorted={defaultSorted}
+                    defaultSorted={this.defaultSorted}
                     defaultPageSize={this.defaultPageSize}
                     showPagination={this.showPagination}
                     className="-striped -highlight"

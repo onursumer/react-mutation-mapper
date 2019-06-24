@@ -9,7 +9,7 @@ import {IHotspotIndex} from "./model/CancerHotspot";
 import {Mutation} from "./model/Mutation";
 import {CancerGene, IOncoKbData} from "./model/OncoKb";
 import {RemoteData} from "./model/RemoteData";
-import DataTable, {DataTableProps} from "./DataTable";
+import DataTable, {DataTableProps, getInitialColumnDataStatus} from "./DataTable";
 import ColumnHeader from "./component/column/ColumnHeader";
 import Annotation, {annotationSortMethod, getAnnotationData} from "./component/column/Annotation";
 
@@ -67,6 +67,37 @@ class DefaultMutationTableComponent extends DataTable<Mutation> {}
 @observer
 export default class DefaultMutationTable extends React.Component<DefaultMutationTableProps, {}>
 {
+    public static defaultProps = {
+        initialSortColumn: MutationColumn.ANNOTATION
+    };
+
+    @computed
+    get initialColumnDataStatus() {
+        return getInitialColumnDataStatus(this.props.initialSortColumnData);
+    }
+
+    // TODO generalize this for all columns
+    @computed
+    get annotationColumnAccessor() {
+        return (mutation: Mutation) =>
+            this.props.initialSortColumn! === MutationColumn.ANNOTATION && this.initialColumnDataStatus === "pending" ?
+                undefined : getAnnotationData(
+                    mutation,
+                    this.props.oncoKbCancerGenes,
+                    this.props.hotspotData,
+                    this.props.oncoKbData
+                );
+    }
+
+    @computed
+    get initialSortColumnData() {
+        return this.props.initialSortColumnData || [
+            this.props.oncoKbCancerGenes,
+            this.props.hotspotData,
+            this.props.oncoKbData
+        ];
+    }
+
     @computed
     get columns() {
         return [
@@ -79,14 +110,7 @@ export default class DefaultMutationTable extends React.Component<DefaultMutatio
             },
             {
                 id: MutationColumn.ANNOTATION,
-                // TODO workaround: returning a function as an accessor to make sorting works,
-                // there might be a better way to fix this problem
-                accessor: (mutation: Mutation) => () => getAnnotationData(
-                    mutation,
-                    this.props.oncoKbCancerGenes,
-                    this.props.hotspotData,
-                    this.props.oncoKbData
-                ),
+                accessor: this.annotationColumnAccessor,
                 Cell: (column: any) =>
                     <Annotation
                         mutation={column.original}
@@ -144,6 +168,7 @@ export default class DefaultMutationTable extends React.Component<DefaultMutatio
             <DefaultMutationTableComponent
                 {...this.props}
                 columns={this.columns}
+                initialSortColumnData={this.initialSortColumnData}
             />
         );
     }

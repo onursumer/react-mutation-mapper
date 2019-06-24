@@ -175,9 +175,9 @@ export function getAnnotationData(mutation?: Mutation,
     return value as IAnnotation;
 }
 
-export function annotationSortMethod(a: () => IAnnotation, b: () => IAnnotation)
+export function annotationSortMethod(a: IAnnotation, b: IAnnotation)
 {
-    return defaultArraySortMethod(sortValue(a()), sortValue(b()));
+    return defaultArraySortMethod(sortValue(a), sortValue(b));
 }
 
 export function sortValue(annotation: IAnnotation): number[]
