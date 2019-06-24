@@ -39,7 +39,7 @@ const HEADERS = {
         <ColumnHeader headerContent={<span>Annotation</span>} />
     ),
     [MutationColumn.MUTATION_STATUS]: (
-        <ColumnHeader headerContent={<span>MS</span>} overlay={<span>Mutation Status</span>} />
+        <ColumnHeader headerContent={<span>Mutation Status</span>} />
     ),
     [MutationColumn.MUTATION_TYPE]: (
         <ColumnHeader headerContent={<span>Mutation Type</span>} />
