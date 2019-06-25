@@ -100,6 +100,7 @@ export default class MutationMapper extends React.Component<MutationMapperProps,
                 hotspotData={this.store.indexedHotspotData}
                 oncoKbData={this.store.oncoKbData}
                 oncoKbCancerGenes={this.store.oncoKbCancerGenes}
+                oncoKbEvidenceCache={this.store.oncoKbEvidenceCache}
             />
         );
     }

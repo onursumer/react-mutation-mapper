@@ -1,12 +1,12 @@
-// import autobind from "autobind-decorator";
+import autobind from "autobind-decorator";
+import {DefaultTooltip} from "cbioportal-frontend-commons";
 import * as React from "react";
 import {observable} from "mobx";
 import {observer} from "mobx-react";
-// import {DefaultTooltip} from "cbioportal-frontend-commons";
 
-import {Query} from "../../generated/OncoKbAPI";
 import {MobxCache} from "../../model/MobxCache";
-import {IndicatorQueryResp} from "../../model/OncoKb";
+import {IndicatorQueryResp, Query} from "../../model/OncoKb";
+import {SimpleCache} from "../../model/SimpleCache";
 import {
     calcOncogenicScore,
     calcResistanceLevelScore,
@@ -16,19 +16,17 @@ import {
     oncogenicYPosition
 } from "../../util/OncoKbUtils";
 import {errorIcon, loaderIcon} from "../StatusHelpers";
-
-// import OncoKbTooltip from "./OncoKbTooltip";
+import OncoKbTooltip from "./OncoKbTooltip";
 // import OncoKbFeedback from "./OncoKbFeedback";
-// import {getCurrentURLWithoutHash} from "../../../api/urls";
 
 import annotationStyles from "../column/annotation.module.scss";
 import oncogenicIconStyles from "./main.module.scss";
-// import '../styles/oncokb/oncokb.scss';
+import './oncokb.scss';
 
 export interface IOncoKbProps {
     status: "pending" | "error" | "complete";
     indicator?: IndicatorQueryResp;
-    evidenceCache?: MobxCache;
+    evidenceCache?: SimpleCache;
     evidenceQuery?: Query;
     pubMedCache?: MobxCache;
     isCancerGene:boolean;
@@ -108,68 +106,68 @@ export default class OncoKB extends React.Component<IOncoKbProps, {}>
                     />
                 </span>
             );
-            // if (this.showFeedback)
-            // {
-            //     oncoKbContent = (
-            //         <span>
-            //             {oncoKbContent}
-            //             <OncoKbFeedback
-            //                 userEmailAddress={this.props.userEmailAddress}
-            //                 hugoSymbol={this.props.hugoGeneSymbol}
-            //                 alteration={this.props.evidenceQuery ? this.props.evidenceQuery.alteration : undefined}
-            //                 showFeedback={this.showFeedback}
-            //                 handleFeedbackClose={this.handleFeedbackClose}
-            //             />
-            //         </span>
-            //     );
-            // }
-            // else if (this.tooltipDataLoadComplete || this.props.evidenceCache && this.props.evidenceQuery)
-            // {
-            //     oncoKbContent = (
-            //         <DefaultTooltip
-            //             overlayClassName="oncokb-tooltip"
-            //             overlay={this.tooltipContent}
-            //             placement="right"
-            //             trigger={['hover', 'focus']}
-            //             onPopupAlign={hideArrow}
-            //             destroyTooltipOnHide={true}
-            //         >
-            //             {oncoKbContent}
-            //         </DefaultTooltip>
-            //     );
-            // }
+            if (this.showFeedback)
+            {
+                oncoKbContent = (
+                    <span>
+                        {oncoKbContent}
+                        {/*<OncoKbFeedback*/}
+                            {/*userEmailAddress={this.props.userEmailAddress}*/}
+                            {/*hugoSymbol={this.props.hugoGeneSymbol}*/}
+                            {/*alteration={this.props.evidenceQuery ? this.props.evidenceQuery.alteration : undefined}*/}
+                            {/*showFeedback={this.showFeedback}*/}
+                            {/*handleFeedbackClose={this.handleFeedbackClose}*/}
+                        {/*/>*/}
+                    </span>
+                );
+            }
+            else if (this.tooltipDataLoadComplete || this.props.evidenceCache && this.props.evidenceQuery)
+            {
+                oncoKbContent = (
+                    <DefaultTooltip
+                        overlayClassName="oncokb-tooltip"
+                        overlay={this.tooltipContent}
+                        placement="right"
+                        trigger={['hover', 'focus']}
+                        onPopupAlign={hideArrow}
+                        destroyTooltipOnHide={true}
+                    >
+                        {oncoKbContent}
+                    </DefaultTooltip>
+                );
+            }
         }
 
         return oncoKbContent;
     }
 
-    // @autobind
-    // private tooltipContent(): JSX.Element
-    // {
-    //     return (
-    //         <OncoKbTooltip
-    //             hugoSymbol={this.props.hugoGeneSymbol}
-    //             geneNotExist={this.props.geneNotExist}
-    //             isCancerGene={this.props.isCancerGene}
-    //             indicator={this.props.indicator || undefined}
-    //             evidenceCache={this.props.evidenceCache}
-    //             evidenceQuery={this.props.evidenceQuery}
-    //             pubMedCache={this.props.pubMedCache}
-    //             handleFeedbackOpen={this.handleFeedbackOpen}
-    //             onLoadComplete={this.handleLoadComplete}
-    //         />
-    //     );
-    // }
+    @autobind
+    private tooltipContent(): JSX.Element
+    {
+        return (
+            <OncoKbTooltip
+                hugoSymbol={this.props.hugoGeneSymbol}
+                geneNotExist={this.props.geneNotExist}
+                isCancerGene={this.props.isCancerGene}
+                indicator={this.props.indicator || undefined}
+                evidenceCache={this.props.evidenceCache}
+                evidenceQuery={this.props.evidenceQuery}
+                pubMedCache={this.props.pubMedCache}
+                onLoadComplete={this.handleLoadComplete}
+                // handleFeedbackOpen={this.handleFeedbackOpen}
+            />
+        );
+    }
 
     // purpose of this callback is to trigger re-instantiation
     // of the tooltip upon full load of the tooltip data
-    // @autobind
-    // private handleLoadComplete(): void {
-    //     // update only once to avoid unnecessary re-rendering
-    //     if (!this.tooltipDataLoadComplete) {
-    //         this.tooltipDataLoadComplete = true;
-    //     }
-    // }
+    @autobind
+    private handleLoadComplete(): void {
+        // update only once to avoid unnecessary re-rendering
+        if (!this.tooltipDataLoadComplete) {
+            this.tooltipDataLoadComplete = true;
+        }
+    }
 
     // @autobind
     // private handleFeedbackOpen(): void {

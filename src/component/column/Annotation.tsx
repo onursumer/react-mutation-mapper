@@ -8,6 +8,7 @@ import {MobxCache} from "../../model/MobxCache";
 import {Mutation} from "../../model/Mutation";
 import {RemoteData} from "../../model/RemoteData";
 import {CancerGene, IndicatorQueryResp, IOncoKbData} from "../../model/OncoKb";
+import {SimpleCache} from "../../model/SimpleCache";
 import {is3dHotspot, isRecurrentHotspot} from "../../util/CancerHotspotsUtils";
 import {getIndicatorData} from "../../util/OncoKbUtils";
 import {defaultArraySortMethod} from "../../util/ReactTableUtils";
@@ -23,7 +24,7 @@ export type AnnotationProps = {
     hotspotData?: RemoteData<IHotspotIndex | undefined>;
     oncoKbData?: RemoteData<IOncoKbData | Error | undefined>;
     oncoKbCancerGenes?: RemoteData<CancerGene[] | Error | undefined>;
-    oncoKbEvidenceCache?: MobxCache;
+    oncoKbEvidenceCache?: SimpleCache;
     pubMedCache?: MobxCache;
     resolveEntrezGeneId?: (mutation: Mutation) => number;
     resolveTumorType?: (mutation: Mutation) => string;

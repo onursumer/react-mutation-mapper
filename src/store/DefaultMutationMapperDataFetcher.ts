@@ -36,9 +36,9 @@ export interface MutationMapperDataFetcherConfig {
 
 export class DefaultMutationMapperDataFetcher
 {
-    private oncoKbClient: OncoKbAPI;
-    private genomeNexusClient: GenomeNexusAPI;
-    private genomeNexusInternalClient: GenomeNexusAPIInternal;
+    public oncoKbClient: OncoKbAPI;
+    public genomeNexusClient: GenomeNexusAPI;
+    public genomeNexusInternalClient: GenomeNexusAPIInternal;
 
     constructor(
         private config: MutationMapperDataFetcherConfig,

@@ -36,6 +36,7 @@ import {
 import {groupPtmDataByPosition, groupPtmDataByTypeAndPosition} from "../util/PtmUtils";
 import {DefaultMutationMapperDataStore} from "./DefaultMutationMapperDataStore";
 import {DefaultMutationMapperDataFetcher} from "./DefaultMutationMapperDataFetcher";
+import OncoKbEvidenceCache from "../cache/OncoKbEvidenceCache";
 
 interface DefaultMutationMapperStoreConfig {
     isoformOverrideSource?: string;
@@ -101,6 +102,11 @@ class DefaultMutationMapperStore implements MutationMapperStore
     @cached
     public get dataStore(): DataStore {
         return new DefaultMutationMapperDataStore(this.mutations, this.customFilterApplier);
+    }
+
+    @cached
+    public get oncoKbEvidenceCache() {
+        return new OncoKbEvidenceCache(this.dataFetcher.oncoKbClient);
     }
 
     @computed

@@ -1,3 +1,6 @@
+// TODO do not use generated models
+import {VariantAnnotation} from "../generated/GenomeNexusAPI";
+
 import {Hotspot, IHotspotIndex} from "./CancerHotspot";
 import DataStore from "./DataStore";
 import {Gene} from "./Gene";
@@ -7,7 +10,7 @@ import {CancerGene, IndicatorQueryResp, IOncoKbData} from "./OncoKb";
 import {PfamDomain} from "./Pfam";
 import {PostTranslationalModification} from "./PostTranslationalModification";
 import {RemoteData} from "./RemoteData";
-import {VariantAnnotation} from "../generated/GenomeNexusAPI";
+import {SimpleCache} from "./SimpleCache";
 
 export interface MutationMapperStore {
     gene: Gene;
@@ -29,6 +32,7 @@ export interface MutationMapperStore {
     oncoKbCancerGenes: RemoteData<CancerGene[] | Error | undefined>;
     oncoKbData: RemoteData<IOncoKbData | Error | undefined>;
     oncoKbDataByPosition: {[pos: number]: IndicatorQueryResp[]};
+    oncoKbEvidenceCache?: SimpleCache;
     indexedVariantAnnotations: RemoteData<{[genomicLocation: string]: VariantAnnotation} | undefined>;
     transcriptsWithAnnotations: RemoteData<string[] | undefined>;
     transcriptsWithProteinLength: RemoteData<string[] | undefined>;

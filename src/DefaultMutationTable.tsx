@@ -2,6 +2,8 @@ import {computed} from "mobx";
 import {observer} from "mobx-react";
 import * as React from "react";
 
+import Annotation, {annotationSortMethod, getAnnotationData} from "./component/column/Annotation";
+import ColumnHeader from "./component/column/ColumnHeader";
 import MutationStatus from "./component/column/MutationStatus";
 import MutationType from "./component/column/MutationType";
 import ProteinChange, {proteinChangeSortMethod} from "./component/column/ProteinChange";
@@ -9,14 +11,14 @@ import {IHotspotIndex} from "./model/CancerHotspot";
 import {Mutation} from "./model/Mutation";
 import {CancerGene, IOncoKbData} from "./model/OncoKb";
 import {RemoteData} from "./model/RemoteData";
+import {SimpleCache} from "./model/SimpleCache";
 import DataTable, {DataTableProps, getInitialColumnDataStatus} from "./DataTable";
-import ColumnHeader from "./component/column/ColumnHeader";
-import Annotation, {annotationSortMethod, getAnnotationData} from "./component/column/Annotation";
 
 export type DefaultMutationTableProps = {
     hotspotData?: RemoteData<IHotspotIndex | undefined>;
     oncoKbData?: RemoteData<IOncoKbData | Error | undefined>;
     oncoKbCancerGenes?: RemoteData<CancerGene[] | Error | undefined>;
+    oncoKbEvidenceCache?: SimpleCache;
 } & DataTableProps<Mutation>;
 
 export enum MutationColumn {
@@ -119,6 +121,7 @@ export default class DefaultMutationTable extends React.Component<DefaultMutatio
                         hotspotData={this.props.hotspotData}
                         oncoKbData={this.props.oncoKbData}
                         oncoKbCancerGenes={this.props.oncoKbCancerGenes}
+                        oncoKbEvidenceCache={this.props.oncoKbEvidenceCache}
                     />,
                 Header: HEADERS[MutationColumn.ANNOTATION],
                 sortMethod: annotationSortMethod
