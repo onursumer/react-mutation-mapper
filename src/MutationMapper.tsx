@@ -10,7 +10,7 @@ import LollipopMutationPlot from "./LollipopMutationPlot";
 import DefaultMutationRateSummary, {MutationRate} from "./DefaultMutationRateSummary";
 import DefaultMutationTable from "./DefaultMutationTable";
 import GeneSummary from "./GeneSummary";
-import {TrackVisibility} from "./TrackSelector";
+import {TrackName, TrackVisibility} from "./TrackSelector";
 import {initDefaultTrackVisibility} from "./util/TrackUtils";
 
 export type MutationMapperProps = {
@@ -18,6 +18,10 @@ export type MutationMapperProps = {
     data: Partial<Mutation>[];
     store?: MutationMapperStore;
     trackVisibility?: TrackVisibility;
+    tracks?: TrackName[];
+    showPlotYMaxSlider?: boolean;
+    showPlotLegendToggle?: boolean;
+    showPlotDownloadControls?: boolean;
     mutationTable?: JSX.Element;
     mutationRates?: MutationRate[];
     pubMedCache?: MobxCache;
@@ -112,6 +116,10 @@ export default class MutationMapper extends React.Component<MutationMapperProps,
                 pubMedCache={this.props.pubMedCache}
                 geneWidth={this.geneWidth}
                 trackVisibility={this.trackVisibility}
+                tracks={this.props.tracks}
+                showYMaxSlider={this.props.showPlotYMaxSlider}
+                showLegendToggle={this.props.showPlotLegendToggle}
+                showDownloadControls={this.props.showPlotDownloadControls}
                 // TODO set more props
                 // onXAxisOffset={this.onXAxisOffset}
                 // trackDataStatus={this.trackDataStatus}
