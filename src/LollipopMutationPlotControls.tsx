@@ -32,7 +32,7 @@ type LollipopMutationPlotControlsProps = {
 @observer
 export default class LollipopMutationPlotControls extends React.Component<LollipopMutationPlotControlsProps, {}>
 {
-    public static defaultProps: Partial<ILollipopMutationPlotControlsProps> = {
+    public static defaultProps: Partial<LollipopMutationPlotControlsProps> = {
         showYMaxSlider: true,
         showLegendToggle: true,
         showDownloadControls: true
