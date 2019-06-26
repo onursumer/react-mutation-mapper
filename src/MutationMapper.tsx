@@ -1,6 +1,7 @@
 import {action, computed, observable} from "mobx";
 import {observer} from "mobx-react";
 import * as React from "react";
+import {Column, TableProps} from "react-table";
 
 import {MobxCache} from "./model/MobxCache";
 import {Mutation} from "./model/Mutation";
@@ -19,6 +20,8 @@ export type MutationMapperProps = {
     store?: MutationMapperStore;
     trackVisibility?: TrackVisibility;
     tracks?: TrackName[];
+    customMutationTableColumns?: Column<Mutation>[];
+    customMutationTableProps?: Partial<TableProps<Mutation>>;
     showPlotYMaxSlider?: boolean;
     showPlotLegendToggle?: boolean;
     showPlotDownloadControls?: boolean;
@@ -101,6 +104,8 @@ export default class MutationMapper extends React.Component<MutationMapperProps,
         return this.props.mutationTable || (
             <DefaultMutationTable
                 dataStore={this.store.dataStore}
+                columns={this.props.customMutationTableColumns}
+                reactTableProps={this.props.customMutationTableProps}
                 hotspotData={this.store.indexedHotspotData}
                 oncoKbData={this.store.oncoKbData}
                 oncoKbCancerGenes={this.store.oncoKbCancerGenes}

@@ -1,10 +1,10 @@
 import autobind from "autobind-decorator";
 import classnames from "classnames";
 import _ from "lodash";
-import {computed} from "mobx";
+import {action, computed, observable} from "mobx";
 import {observer} from "mobx-react";
 import * as React from 'react';
-import ReactTable, {Column, RowInfo} from "react-table";
+import ReactTable, {Column, RowInfo, TableProps} from "react-table";
 
 import {DataStore} from "./model/DataStore";
 import {RemoteData} from "./model/RemoteData";
@@ -17,6 +17,7 @@ export type DataTableProps<T> =
     dataStore?: DataStore;
     columns?: Column<T>[];
     className?: string;
+    reactTableProps?: Partial<TableProps<T>>;
 
     initialSortColumnData?: (RemoteData<any>|undefined)[];
     initialSortColumn?: string;
@@ -41,6 +42,9 @@ export default class DataTable<T> extends React.Component<DataTableProps<T>, {}>
         highlightColorLight: "#B0BED9",
         highlightColorDark: "#9FAFD1"
     };
+
+    @observable
+    private expanded: {[index: number] : boolean} = {};
 
     @computed
     get tableData(): T[] | undefined
@@ -120,6 +124,11 @@ export default class DataTable<T> extends React.Component<DataTableProps<T>, {}>
                     className="-striped -highlight"
                     previousText="<"
                     nextText=">"
+                    expanded={this.expanded}
+                    onExpandedChange={this.onExpandedChange}
+                    onPageChange={this.resetExpander}
+                    onSortedChange={this.resetExpander}
+                    {...this.props.reactTableProps}
                 />
             </div>
         );
@@ -133,6 +142,16 @@ export default class DataTable<T> extends React.Component<DataTableProps<T>, {}>
                 background: state && row && this.getRowBackground(row)
             }
         };
+    }
+
+    @action.bound
+    private onExpandedChange(expanded: {[index: number] : boolean}) {
+        this.expanded = expanded;
+    }
+
+    @action.bound
+    private resetExpander() {
+        this.expanded = {};
     }
 
     protected isRowHighlighted(datum: T) {

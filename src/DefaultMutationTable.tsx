@@ -1,6 +1,7 @@
 import {computed} from "mobx";
 import {observer} from "mobx-react";
 import * as React from "react";
+import {Column} from "react-table";
 
 import Annotation, {annotationSortMethod, getAnnotationData} from "./component/column/Annotation";
 import ColumnHeader from "./component/column/ColumnHeader";
@@ -19,6 +20,8 @@ export type DefaultMutationTableProps = {
     oncoKbData?: RemoteData<IOncoKbData | Error | undefined>;
     oncoKbCancerGenes?: RemoteData<CancerGene[] | Error | undefined>;
     oncoKbEvidenceCache?: SimpleCache;
+    columns?: Column<Mutation>[];
+    appendColumns?: boolean;
 } & DataTableProps<Mutation>;
 
 export enum MutationColumn {
@@ -70,7 +73,8 @@ class DefaultMutationTableComponent extends DataTable<Mutation> {}
 export default class DefaultMutationTable extends React.Component<DefaultMutationTableProps, {}>
 {
     public static defaultProps = {
-        initialSortColumn: MutationColumn.ANNOTATION
+        initialSortColumn: MutationColumn.ANNOTATION,
+        appendColumns: true
     };
 
     @computed
@@ -102,6 +106,17 @@ export default class DefaultMutationTable extends React.Component<DefaultMutatio
 
     @computed
     get columns() {
+        // TODO allow inserting columns into any arbitrary position (not just at the end of the list)
+        if (this.props.columns) {
+            return this.props.appendColumns ? [...this.defaultColumns, ...this.props.columns] : this.props.columns;
+        }
+        else {
+            return this.defaultColumns;
+        }
+    }
+
+    @computed
+    get defaultColumns() {
         return [
             {
                 id: MutationColumn.PROTEIN_CHANGE,
