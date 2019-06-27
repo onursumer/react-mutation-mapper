@@ -76,7 +76,7 @@ export default class MutationMapper extends React.Component<MutationMapperProps,
     get store(): MutationMapperStore {
         return this.props.store || new DefaultMutationMapperStore(
             {
-                // TODO entrezGeneId: ???,
+                // TODO entrezGeneId: ???, -> we need entrezGeneId to display uniprot id
                 hugoGeneSymbol: this.props.hugoSymbol
             },
             {
