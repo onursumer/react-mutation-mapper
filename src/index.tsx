@@ -7,7 +7,10 @@ export {default as LollipopMutationPlot} from "./LollipopMutationPlot";
 export {default as LollipopPlot} from "./LollipopPlot";
 export {default as LollipopPlotNoTooltip} from "./LollipopPlotNoTooltip";
 export {default as Sequence} from "./LollipopPlot";
-export {default as MutationMapper} from "./MutationMapper";
+export {
+    default as MutationMapper,
+    MutationMapperProps
+} from "./MutationMapper";
 export {
     default as TrackSelector,
     TrackDataStatus,

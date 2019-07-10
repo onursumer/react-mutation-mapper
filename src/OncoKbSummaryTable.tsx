@@ -11,7 +11,7 @@ import {
 
 import {defaultSortMethod, defaultStringArraySortMethod} from "./util/ReactTableUtils";
 
-import levelStyles from "cbioportal-frontend-commons/styleModules/level.module.scss";
+import levelStyles from "./component/oncokb/level.module.scss";
 import styles from "./oncokbSummaryTable.module.scss";
 
 export type OncoKbSummaryTableProps = {

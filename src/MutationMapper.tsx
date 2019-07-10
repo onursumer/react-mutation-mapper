@@ -11,12 +11,12 @@ import LollipopMutationPlot from "./LollipopMutationPlot";
 import DefaultMutationRateSummary, {MutationRate} from "./DefaultMutationRateSummary";
 import DefaultMutationTable from "./DefaultMutationTable";
 import GeneSummary from "./GeneSummary";
-import {TrackName, TrackVisibility} from "./TrackSelector";
+import {TrackDataStatus, TrackName, TrackVisibility} from "./TrackSelector";
 import {initDefaultTrackVisibility} from "./util/TrackUtils";
 
 export type MutationMapperProps = {
-    hugoSymbol: string;
-    data: Partial<Mutation>[];
+    hugoSymbol?: string;
+    data?: Partial<Mutation>[];
     store?: MutationMapperStore;
     trackVisibility?: TrackVisibility;
     tracks?: TrackName[];
@@ -36,10 +36,13 @@ export type MutationMapperProps = {
     isoformOverrideSource?: string;
     mainLoadingIndicator?: JSX.Element;
     geneSummaryLoadingIndicator?: JSX.Element;
+    getLollipopColor?: (mutations: Mutation[]) => string;
+    onXAxisOffset?: (offset:number) => void;
+    onTrackVisibilityChange?: (selectedTrackIds: string[]) => void;
 };
 
 @observer
-export default class MutationMapper extends React.Component<MutationMapperProps, {}>
+export default class MutationMapper<P extends MutationMapperProps = MutationMapperProps> extends React.Component<P, {}>
 {
     public static defaultProps: Partial<MutationMapperProps> = {
         // TODO pubMedCache
@@ -52,7 +55,8 @@ export default class MutationMapper extends React.Component<MutationMapperProps,
     private _trackVisibility: TrackVisibility | undefined;
 
     @computed
-    get geneWidth(){
+    protected get geneWidth()
+    {
         // TODO return WindowStore.size.width * 0.7 - this.lollipopPlotGeneX;
         return 666;
     }
@@ -72,22 +76,29 @@ export default class MutationMapper extends React.Component<MutationMapperProps,
         }
     }
 
+    protected get trackDataStatus(): TrackDataStatus
+    {
+        // TODO dummy method for now: move the implementation from cbioportal-frontend
+        return {};
+    }
+
     @computed
-    get store(): MutationMapperStore {
-        return this.props.store || new DefaultMutationMapperStore(
+    protected get store(): MutationMapperStore
+    {
+        return this.props.store ? this.props.store! : new DefaultMutationMapperStore(
             {
                 // TODO entrezGeneId: ???, -> we need entrezGeneId to display uniprot id
-                hugoGeneSymbol: this.props.hugoSymbol
+                hugoGeneSymbol: this.props.hugoSymbol ? this.props.hugoSymbol! : ""
             },
             {
                 isoformOverrideSource: this.props.isoformOverrideSource,
                 filterMutationsBySelectedTranscript: this.props.filterMutationsBySelectedTranscript,
                 genomeNexusUrl: this.props.genomeNexusUrl
             },
-            () => this.props.data as Mutation[]);
+            () => (this.props.data || []) as Mutation[]);
     }
 
-    // TODO for this we need to implement data table items label first...
+    // TODO for this we need to implement data table items label first
     // @computed
     // get multipleMutationInfo(): string {
     //     const count = this.store.dataStore.duplicateMutationCountInMultipleSamples;
@@ -100,8 +111,9 @@ export default class MutationMapper extends React.Component<MutationMapperProps,
     //     return `Mutations${this.multipleMutationInfo}`;
     // }
 
-    get mutationTableComponent() {
-        return this.props.mutationTable || (
+    protected get mutationTableComponent(): JSX.Element | null
+    {
+        return this.props.mutationTable ? this.props.mutationTable! : (
             <DefaultMutationTable
                 dataStore={this.store.dataStore}
                 columns={this.props.customMutationTableColumns}
@@ -114,7 +126,8 @@ export default class MutationMapper extends React.Component<MutationMapperProps,
         );
     }
 
-    get mutationPlot() {
+    protected get mutationPlot(): JSX.Element | null
+    {
         return (
             <LollipopMutationPlot
                 store={this.store}
@@ -125,15 +138,15 @@ export default class MutationMapper extends React.Component<MutationMapperProps,
                 showYMaxSlider={this.props.showPlotYMaxSlider}
                 showLegendToggle={this.props.showPlotLegendToggle}
                 showDownloadControls={this.props.showPlotDownloadControls}
-                // TODO set more props
-                // onXAxisOffset={this.onXAxisOffset}
-                // trackDataStatus={this.trackDataStatus}
-                // onTrackVisibilityChange={this.onTrackVisibilityChange}
+                trackDataStatus={this.trackDataStatus}
+                onXAxisOffset={this.props.onXAxisOffset}
+                onTrackVisibilityChange={this.props.onTrackVisibilityChange}
+                getLollipopColor={this.props.getLollipopColor}
             />
         );
     }
 
-    get geneSummary():JSX.Element
+    protected get geneSummary(): JSX.Element | null
     {
         return (
             <GeneSummary
@@ -154,16 +167,18 @@ export default class MutationMapper extends React.Component<MutationMapperProps,
         );
     }
 
-    get mutationRateSummary(): JSX.Element|null {
-        return this.props.mutationRates ? <DefaultMutationRateSummary rates={this.props.mutationRates} /> : null;
+    protected get mutationRateSummary(): JSX.Element | null
+    {
+        return this.props.mutationRates ? <DefaultMutationRateSummary rates={this.props.mutationRates!} /> : null;
     }
 
-    get isMutationTableDataLoading() {
+    protected get isMutationTableDataLoading()
+    {
         // Child classes should override this method
         return false;
     }
 
-    get mutationTable(): JSX.Element|null
+    protected get mutationTable(): JSX.Element | null
     {
         return (
             <span>
@@ -172,34 +187,51 @@ export default class MutationMapper extends React.Component<MutationMapperProps,
         );
     }
 
-    get isMutationPlotDataLoading() {
+    protected get proteinChainPanel(): JSX.Element | null
+    {
+        // TODO move the implementation from cbioportal-frontend
+        return null;
+    }
+
+    protected get mutationFilterPanel(): JSX.Element | null
+    {
+        // TODO move the implementation from cbioportal-frontend
+        return null;
+    }
+
+    protected get view3dButton(): JSX.Element | null
+    {
+        // TODO move the implementation from cbioportal-frontend
+        return null;
+    }
+
+    protected get isMutationPlotDataLoading() {
         return this.store.pfamDomainData.isPending;
     }
 
-    get isLoading() {
+    protected get isLoading() {
         return this.store.mutationData.isPending || this.isMutationPlotDataLoading || this.isMutationTableDataLoading;
     }
 
-    get loadingIndicator() {
+    protected get loadingIndicator() {
         return this.props.mainLoadingIndicator || <i className="fa fa-spinner fa-pulse fa-2x" />;
     }
 
-    // TODO add missing components!
     public render()
     {
         return this.isLoading ? this.loadingIndicator : (
             <div>
-                {/*!this.props.store.dataStore.showingAllData && this.filterResetPanel()*/}
+                {/* TODO !this.props.store.dataStore.showingAllData && this.filterResetPanel()*/}
                 <div style={{ display:'flex' }}>
                     <div className="borderedChart" style={{ marginRight: "1rem" }}>
                         {this.mutationPlot}
-                        {/*this.proteinChainPanel*/}
+                        {this.proteinChainPanel}
                     </div>
                     <div className="mutationMapperMetaColumn">
                         {this.geneSummary}
                         {this.mutationRateSummary}
-                        {/*this.proteinImpactTypePanel*/}
-                        {/*this.view3dButton*/}
+                        {this.mutationFilterPanel}
+                        {this.view3dButton}
                     </div>
                 </div>
                 {this.mutationTable}

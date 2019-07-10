@@ -526,7 +526,7 @@ class DefaultMutationMapperStore implements MutationMapperStore
         }
     }
 
-    readonly indexedVariantAnnotations = remoteData<{[genomicLocation: string]: VariantAnnotation} | undefined>({
+    readonly indexedVariantAnnotations: MobxPromise<{[genomicLocation: string]: VariantAnnotation} | undefined> = remoteData({
         invoke: async () => this.getMutations() ?
             await this.dataFetcher.fetchVariantAnnotationsIndexedByGenomicLocation(
                 this.getMutations(), ["annotation_summary", "hotspots"], this.isoformOverrideSource) :
