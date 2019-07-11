@@ -122,6 +122,8 @@ export default class MutationMapper<P extends MutationMapperProps = MutationMapp
                 oncoKbData={this.store.oncoKbData}
                 oncoKbCancerGenes={this.store.oncoKbCancerGenes}
                 oncoKbEvidenceCache={this.store.oncoKbEvidenceCache}
+                civicGenes={this.store.civicGenes}
+                civicVariants={this.store.civicVariants}
             />
         );
     }

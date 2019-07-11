@@ -9,6 +9,7 @@ import MutationStatus from "./component/column/MutationStatus";
 import MutationType from "./component/column/MutationType";
 import ProteinChange, {proteinChangeSortMethod} from "./component/column/ProteinChange";
 import {IHotspotIndex} from "./model/CancerHotspot";
+import {ICivicGene, ICivicVariant} from "./model/Civic";
 import {Mutation} from "./model/Mutation";
 import {CancerGene, IOncoKbData} from "./model/OncoKb";
 import {RemoteData} from "./model/RemoteData";
@@ -20,6 +21,8 @@ export type DefaultMutationTableProps = {
     oncoKbData?: RemoteData<IOncoKbData | Error | undefined>;
     oncoKbCancerGenes?: RemoteData<CancerGene[] | Error | undefined>;
     oncoKbEvidenceCache?: SimpleCache;
+    civicGenes?: RemoteData<ICivicGene | undefined>;
+    civicVariants?: RemoteData<ICivicVariant | undefined>;
     columns?: Column<Mutation>[];
     appendColumns?: boolean;
 } & DataTableProps<Mutation>;
@@ -133,10 +136,13 @@ export default class DefaultMutationTable extends React.Component<DefaultMutatio
                         mutation={column.original}
                         enableOncoKb={true}
                         enableHotspot={true}
+                        enableCivic={true}
                         hotspotData={this.props.hotspotData}
                         oncoKbData={this.props.oncoKbData}
                         oncoKbCancerGenes={this.props.oncoKbCancerGenes}
                         oncoKbEvidenceCache={this.props.oncoKbEvidenceCache}
+                        civicGenes={this.props.civicGenes}
+                        civicVariants={this.props.civicVariants}
                     />,
                 Header: HEADERS[MutationColumn.ANNOTATION],
                 sortMethod: annotationSortMethod

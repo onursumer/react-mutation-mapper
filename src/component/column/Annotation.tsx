@@ -4,6 +4,7 @@ import {observer} from "mobx-react";
 import * as React from "react";
 
 import {IHotspotIndex} from "../../model/CancerHotspot";
+import {ICivicEntry, ICivicGene, ICivicVariant} from "../../model/Civic";
 import {MobxCache} from "../../model/MobxCache";
 import {Mutation} from "../../model/Mutation";
 import {RemoteData} from "../../model/RemoteData";
@@ -14,13 +15,15 @@ import {getIndicatorData} from "../../util/OncoKbUtils";
 import {defaultArraySortMethod} from "../../util/ReactTableUtils";
 import HotspotAnnotation, {sortValue as hotspotSortValue} from "./HotspotAnnotation";
 import OncoKB, {sortValue as oncoKbSortValue} from "../oncokb/OncoKB";
+import Civic from "../civic/Civic";
+import {getCivicEntry, getCivicStatus} from "../../util/CivicUtils";
 
 export type AnnotationProps = {
     mutation: Mutation;
     enableOncoKb: boolean;
     // enableMyCancerGenome: boolean;
     enableHotspot: boolean;
-    // enableCivic: boolean;
+    enableCivic: boolean;
     hotspotData?: RemoteData<IHotspotIndex | undefined>;
     oncoKbData?: RemoteData<IOncoKbData | Error | undefined>;
     oncoKbCancerGenes?: RemoteData<CancerGene[] | Error | undefined>;
@@ -29,8 +32,8 @@ export type AnnotationProps = {
     resolveEntrezGeneId?: (mutation: Mutation) => number;
     resolveTumorType?: (mutation: Mutation) => string;
     // myCancerGenomeData?: IMyCancerGenomeData;
-    // civicGenes?: ICivicGeneDataWrapper;
-    // civicVariants?: ICivicVariantDataWrapper;
+    civicGenes?: RemoteData<ICivicGene | undefined>;
+    civicVariants?: RemoteData<ICivicVariant | undefined>;
     // studyIdToStudy?: {[studyId:string]:CancerStudy};
     userEmailAddress?:string;
 };
@@ -44,9 +47,9 @@ export interface IAnnotation {
     oncoKbGeneExist:boolean;
     isOncoKbCancerGene:boolean;
     // myCancerGenomeLinks: string[];
-    // civicEntry?: ICivicEntry | null;
-    // civicStatus: "pending" | "error" | "complete";
-    // hasCivicVariants: boolean;
+    civicEntry?: ICivicEntry | null;
+    civicStatus: "pending" | "error" | "complete";
+    hasCivicVariants: boolean;
     hugoGeneSymbol: string;
 }
 
@@ -58,9 +61,9 @@ const DEFAULT_ANNOTATION_DATA: IAnnotation = {
     is3dHotspot: false,
     hotspotStatus: "complete",
     hugoGeneSymbol: '',
-    // hasCivicVariants: true,
+    hasCivicVariants: true,
     // myCancerGenomeLinks: [],
-    // civicStatus: "complete"
+    civicStatus: "complete"
 };
 
 function getDefaultEntrezGeneId(mutation: Mutation): number {
@@ -90,8 +93,8 @@ export function getAnnotationData(mutation?: Mutation,
                                   hotspotData?: RemoteData<IHotspotIndex | undefined>,
                                   // myCancerGenomeData?:IMyCancerGenomeData,
                                   oncoKbData?: RemoteData<IOncoKbData | Error | undefined>,
-                                  // civicGenes?:ICivicGeneDataWrapper,
-                                  // civicVariants?:ICivicVariantDataWrapper,
+                                  civicGenes?: RemoteData<ICivicGene | undefined>,
+                                  civicVariants?: RemoteData<ICivicVariant | undefined>,
                                   // studyIdToStudy?: {[studyId:string]:CancerStudy},
                                   resolveTumorType: (mutation: Mutation) => string = getDefaultTumorType,
                                   resolveEntrezGeneId: (mutation: Mutation) => number = getDefaultEntrezGeneId): IAnnotation
@@ -115,11 +118,11 @@ export function getAnnotationData(mutation?: Mutation,
             hugoGeneSymbol,
             oncoKbGeneExist,
             isOncoKbCancerGene,
-            // civicEntry: civicGenes && civicGenes.result && civicVariants && civicVariants.result ?
-            //     AnnotationColumnFormatter.getCivicEntry(mutation, civicGenes.result, civicVariants.result) : undefined,
-            // civicStatus: civicGenes && civicGenes.status && civicVariants && civicVariants.status ?
-            //     AnnotationColumnFormatter.getCivicStatus(civicGenes.status, civicVariants.status) : "pending",
-            // hasCivicVariants: true,
+            civicEntry: civicGenes && civicGenes.result && civicVariants && civicVariants.result ?
+                 getCivicEntry(mutation, civicGenes.result, civicVariants.result) : undefined,
+            civicStatus: civicGenes && civicGenes.status && civicVariants && civicVariants.status ?
+                 getCivicStatus(civicGenes.status, civicVariants.status) : "pending",
+            hasCivicVariants: true,
             // myCancerGenomeLinks: myCancerGenomeData ?
             //     AnnotationColumnFormatter.getMyCancerGenomeLinks(mutation, myCancerGenomeData) : [],
             isHotspot: hotspotData && hotspotData.result && hotspotData.status === "complete" ?
@@ -217,12 +220,12 @@ export default class Annotation extends React.Component<AnnotationProps, {}>
                     />
                 }
                 {
-                 //   this.props.enableCivic &&
-                 //   <Civic
-                 //       civicEntry={annotation.civicEntry}
-                 //       civicStatus={annotation.civicStatus}
-                 //       hasCivicVariants={annotation.hasCivicVariants}
-                 //   />
+                   this.props.enableCivic &&
+                   <Civic
+                       civicEntry={annotation.civicEntry}
+                       civicStatus={annotation.civicStatus}
+                       hasCivicVariants={annotation.hasCivicVariants}
+                   />
                 }
                 {
                 //    this.props.enableMyCancerGenome &&
@@ -250,7 +253,9 @@ export default class Annotation extends React.Component<AnnotationProps, {}>
             hotspotData,
             oncoKbData,
             resolveEntrezGeneId,
-            resolveTumorType
+            resolveTumorType,
+            civicGenes,
+            civicVariants
         } = props;
 
         return getAnnotationData(
@@ -258,6 +263,8 @@ export default class Annotation extends React.Component<AnnotationProps, {}>
             oncoKbCancerGenes,
             hotspotData,
             oncoKbData,
+            civicGenes,
+            civicVariants,
             resolveTumorType,
             resolveEntrezGeneId);
     }

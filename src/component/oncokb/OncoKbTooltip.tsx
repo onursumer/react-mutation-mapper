@@ -108,12 +108,10 @@ export default class OncoKbTooltip extends React.Component<IOncoKbTooltipProps, 
             );
         }
         else if (cacheData.status === 'pending') {
-            // tooltipContent = <TableCellStatusIndicator status={TableCellStatus.LOADING} />;
-            // TODO loading
+            // TODO tooltipContent = <TableCellStatusIndicator status={TableCellStatus.LOADING} />;
         }
         else if (cacheData.status === 'error') {
-            // tooltipContent = <TableCellStatusIndicator status={TableCellStatus.ERROR} />;
-            // TODO error
+            // TODO tooltipContent = <TableCellStatusIndicator status={TableCellStatus.ERROR} />;
         }
 
         return tooltipContent;

@@ -2,6 +2,7 @@
 import {VariantAnnotation} from "../generated/GenomeNexusAPI";
 
 import {Hotspot, IHotspotIndex} from "./CancerHotspot";
+import {ICivicGene, ICivicVariant} from "./Civic";
 import DataStore from "./DataStore";
 import {Gene} from "./Gene";
 import {EnsemblTranscript} from "./EnsemblTranscript";
@@ -31,6 +32,8 @@ export interface MutationMapperStore {
     hotspotsByPosition: {[pos: number]: Hotspot[]};
     oncoKbCancerGenes: RemoteData<CancerGene[] | Error | undefined>;
     oncoKbData: RemoteData<IOncoKbData | Error | undefined>;
+    civicGenes?: RemoteData<ICivicGene | undefined>;
+    civicVariants?: RemoteData<ICivicVariant | undefined>;
     oncoKbDataByPosition: {[pos: number]: IndicatorQueryResp[]};
     oncoKbEvidenceCache?: SimpleCache;
     indexedVariantAnnotations: RemoteData<{[genomicLocation: string]: VariantAnnotation} | undefined>;

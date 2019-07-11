@@ -37,11 +37,13 @@ import {groupPtmDataByPosition, groupPtmDataByTypeAndPosition} from "../util/Ptm
 import {DefaultMutationMapperDataStore} from "./DefaultMutationMapperDataStore";
 import {DefaultMutationMapperDataFetcher} from "./DefaultMutationMapperDataFetcher";
 import OncoKbEvidenceCache from "../cache/OncoKbEvidenceCache";
+import {ICivicGene} from "../model/Civic";
 
 interface DefaultMutationMapperStoreConfig {
     isoformOverrideSource?: string;
     filterMutationsBySelectedTranscript?: boolean;
     genomeNexusUrl?: string;
+    enableCivic?: boolean;
 }
 
 class DefaultMutationMapperStore implements MutationMapperStore
@@ -507,6 +509,34 @@ class DefaultMutationMapperStore implements MutationMapperStore
             // fail silently, leave the error handling responsibility to the data consumer
         }
     }, ONCOKB_DEFAULT_DATA);
+
+    readonly civicGenes: MobxPromise<ICivicGene | undefined> = remoteData({
+        await: () => [
+            this.mutationData,
+        ],
+        invoke: async() => this.config.enableCivic ? fetchCivicGenes(this.mutationData) : {},
+        onError: () => {
+            // fail silently
+        }
+    }, undefined);
+
+    readonly civicVariants = remoteData<ICivicVariant | undefined>({
+        await: () => [
+            this.civicGenes,
+            this.mutationData
+        ],
+        invoke: async() => {
+            if (this.mutationMapperConfig.show_civic && this.civicGenes.result) {
+                return fetchCivicVariants(this.civicGenes.result as ICivicGene, this.mutationData);
+            }
+            else {
+                return {};
+            }
+        },
+        onError: (err: Error) => {
+            // fail silently
+        }
+    }, undefined);
 
     @computed
     get oncoKbDataByPosition(): {[pos: number]: IndicatorQueryResp[]}
