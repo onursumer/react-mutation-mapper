@@ -17,7 +17,7 @@ import {
 } from "../../util/OncoKbUtils";
 import {errorIcon, loaderIcon} from "../StatusHelpers";
 import OncoKbTooltip from "./OncoKbTooltip";
-// import OncoKbFeedback from "./OncoKbFeedback";
+import OncoKbFeedback from "./OncoKbFeedback";
 
 import annotationStyles from "../column/annotation.module.scss";
 import oncogenicIconStyles from "./main.module.scss";
@@ -33,6 +33,7 @@ export interface IOncoKbProps {
     geneNotExist:boolean;
     hugoGeneSymbol:string;
     userEmailAddress?:string;
+    disableFeedback?:boolean;
 }
 
 function getOncogenicIconsStyle(indicator: IndicatorQueryResp | undefined)
@@ -59,6 +60,18 @@ export function sortValue(indicator?: IndicatorQueryResp|undefined|null): number
     return values;
 }
 
+export function download(indicator?: IndicatorQueryResp|undefined|null): string
+{
+    if (!indicator) {
+        return "NA";
+    }
+
+    const oncogenic = indicator.oncogenic ? indicator.oncogenic : "Unknown";
+    const level = indicator.highestSensitiveLevel ? indicator.highestSensitiveLevel.toLowerCase() : "level NA";
+
+    return `${oncogenic}, ${level}`;
+}
+
 export function hideArrow(tooltipEl: any) {
     const arrowEl = tooltipEl.querySelector('.rc-tooltip-arrow');
     arrowEl.style.display = 'none';
@@ -69,18 +82,6 @@ export default class OncoKB extends React.Component<IOncoKbProps, {}>
 {
     @observable showFeedback:boolean = false;
     @observable tooltipDataLoadComplete:boolean = false;
-
-    public static download(indicator?: IndicatorQueryResp|undefined|null): string
-    {
-        if (!indicator) {
-            return "NA";
-        }
-
-        const oncogenic = indicator.oncogenic ? indicator.oncogenic : "Unknown";
-        const level = indicator.highestSensitiveLevel ? indicator.highestSensitiveLevel.toLowerCase() : "level NA";
-
-        return `${oncogenic}, ${level}`;
-    }
 
     public render()
     {
@@ -106,18 +107,18 @@ export default class OncoKB extends React.Component<IOncoKbProps, {}>
                     />
                 </span>
             );
-            if (this.showFeedback)
+            if (!this.props.disableFeedback && this.showFeedback)
             {
                 oncoKbContent = (
                     <span>
                         {oncoKbContent}
-                        {/*<OncoKbFeedback*/}
-                            {/*userEmailAddress={this.props.userEmailAddress}*/}
-                            {/*hugoSymbol={this.props.hugoGeneSymbol}*/}
-                            {/*alteration={this.props.evidenceQuery ? this.props.evidenceQuery.alteration : undefined}*/}
-                            {/*showFeedback={this.showFeedback}*/}
-                            {/*handleFeedbackClose={this.handleFeedbackClose}*/}
-                        {/*/>*/}
+                        <OncoKbFeedback
+                            userEmailAddress={this.props.userEmailAddress}
+                            hugoSymbol={this.props.hugoGeneSymbol}
+                            alteration={this.props.evidenceQuery ? this.props.evidenceQuery.alteration : undefined}
+                            showFeedback={this.showFeedback}
+                            handleFeedbackClose={this.handleFeedbackClose}
+                        />
                     </span>
                 );
             }
@@ -154,7 +155,7 @@ export default class OncoKB extends React.Component<IOncoKbProps, {}>
                 evidenceQuery={this.props.evidenceQuery}
                 pubMedCache={this.props.pubMedCache}
                 onLoadComplete={this.handleLoadComplete}
-                // handleFeedbackOpen={this.handleFeedbackOpen}
+                handleFeedbackOpen={this.props.disableFeedback ? undefined : this.handleFeedbackOpen}
             />
         );
     }
@@ -169,13 +170,13 @@ export default class OncoKB extends React.Component<IOncoKbProps, {}>
         }
     }
 
-    // @autobind
-    // private handleFeedbackOpen(): void {
-    //     this.showFeedback = true;
-    // }
+    @autobind
+    private handleFeedbackOpen(): void {
+        this.showFeedback = true;
+    }
 
-    // @autobind
-    // private handleFeedbackClose(): void {
-    //     this.showFeedback = false;
-    // }
+    @autobind
+    private handleFeedbackClose(): void {
+        this.showFeedback = false;
+    }
 }

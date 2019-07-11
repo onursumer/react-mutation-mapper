@@ -226,11 +226,13 @@ export default class OncoKbCard extends React.Component<OncoKbCardProps>
                                 {oncokbLogo}
                             </a>
                         }
-                        <span className={classnames("pull-right", mainStyles.feedback)}>
-                            <button className="btn btn-default btn-sm btn-xs" onClick={this.props.handleFeedbackOpen}>
-                                Feedback
-                            </button>
-                        </span>
+                        {this.props.handleFeedbackOpen &&
+                            <span className={classnames("pull-right", mainStyles.feedback)}>
+                                <button className="btn btn-default btn-sm btn-xs" onClick={this.props.handleFeedbackOpen}>
+                                    Feedback
+                                </button>
+                            </span>
+                        }
                     </div>
                 </div>
             </div>

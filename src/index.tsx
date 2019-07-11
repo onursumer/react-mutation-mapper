@@ -4,9 +4,16 @@ export {
     sortValue as hotspotAnnotationSortValue
 } from "./component/column/HotspotAnnotation";
 
-
+export {
+    default as OncoKB,
+    sortValue as oncoKbAnnotationSortValue,
+    download as oncoKbAnnotationDownload,
+    IOncoKbProps
+} from "./component/oncokb/OncoKB";
 export {default as OncoKBSuggestAnnotationLinkout} from "./component/oncokb/OncoKBSuggestAnnotationLinkout";
 export {default as OncoKbTreatmentTable} from "./component/oncokb/OncoKbTreatmentTable";
+export {default as OncoKbFeedback} from "./component/oncokb/OncoKbFeedback";
+export {default as OncoKbTooltip} from "./component/oncokb/OncoKbTooltip";
 export {default as ReferenceList} from "./component/oncokb/ReferenceList";
 export {default as RefComponent} from "./component/oncokb/RefComponent";
 export {default as SummaryWithRefs} from "./component/oncokb/SummaryWithRefs";
