@@ -1,4 +1,16 @@
 export {default as ColumnHeader} from "./component/column/ColumnHeader";
+export {
+    default as HotspotAnnotation,
+    sortValue as hotspotAnnotationSortValue
+} from "./component/column/HotspotAnnotation";
+
+
+export {default as OncoKBSuggestAnnotationLinkout} from "./component/oncokb/OncoKBSuggestAnnotationLinkout";
+export {default as OncoKbTreatmentTable} from "./component/oncokb/OncoKbTreatmentTable";
+export {default as ReferenceList} from "./component/oncokb/ReferenceList";
+export {default as RefComponent} from "./component/oncokb/RefComponent";
+export {default as SummaryWithRefs} from "./component/oncokb/SummaryWithRefs";
+
 
 export {default as Domain} from "./Domain";
 export {default as HotspotInfo} from "./HotspotInfo";
